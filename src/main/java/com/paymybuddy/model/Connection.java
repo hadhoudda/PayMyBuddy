@@ -1,19 +1,35 @@
 package com.paymybuddy.model;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "connections")
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Connection {
+
+    @Id
+    @Column(name = "id_connection")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private int connectionId;
+
+    @Column(name = "date_connection")
+    private LocalDateTime dateConnection;
+
+    //relation between table connection and user
+    @ManyToOne
+    @JoinColumn(name = "fk_id_user_owner", nullable = false)
+    private User ownerUser;
+
+    @ManyToOne
+    @JoinColumn(name = "fk_id_user_friend", nullable = false)
+    private User friendUser;
 
 }

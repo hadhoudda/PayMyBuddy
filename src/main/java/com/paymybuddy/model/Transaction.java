@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "transactions")
@@ -16,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class Transaction {
 
     @Id
-    @Column(name = "transaction_id")
+    @Column(name = "id_transaction")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int transactionId;
 
@@ -25,4 +27,16 @@ public class Transaction {
 
     @Column(name = "amount")
     private double transactionAmount;
+
+    @Column(name = "date_transaction")
+    private LocalDateTime transactionDate;
+
+    //relation between table transaction and compte
+    @ManyToOne
+    @JoinColumn(name = "fk_id_compte_sender")
+    private Compte compteSender;
+
+    @ManyToOne
+    @JoinColumn(name = "fk_id_compte_reciever")
+    private Compte compteReciever;
 }
