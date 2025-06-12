@@ -1,7 +1,9 @@
 package com.paymybuddy;
 
 import com.paymybuddy.model.User;
+import com.paymybuddy.service.CompteService;
 import com.paymybuddy.service.UserService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -15,18 +17,15 @@ public class PaymybuddyApplication implements CommandLineRunner {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private CompteService compteService;
+
 	public static void main(String[] args) {
 		SpringApplication.run(PaymybuddyApplication.class, args);
 	}
 
 	@Override
+	@Transactional
 	public void run(String... args) throws Exception {
-//		Iterable<User> users = userService.getUsers();
-//		users.forEach(user -> System.out.println(user.getLastName()));
-
-		Optional<User> optionalUser = userService.getUserById(1);
-		User user1 = optionalUser.get();
-
-		//user1.getComptes().forEach(compte -> System.out.println("le solde de user1 est " + compte.getSolde()));
 	}
 }

@@ -82,6 +82,16 @@ CREATE TABLE IF NOT EXISTS `paymybuddy_db`.`comptes` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+----
+---- Dumping data for table `comptes`
+----
+----
+LOCK TABLES `comptes` WRITE;
+/*!40000 ALTER TABLE `comptes` DISABLE KEYS */;
+INSERT INTO `paymybuddy_db`.`comptes` (`solde`, `fk_id_user`)
+VALUES (1700.50, 1), (2050.00, 2), (705.25, 3);
+/*!40000 ALTER TABLE `comptes` ENABLE KEYS */;
+UNLOCK TABLES;
 
 -- -----------------------------------------------------
 -- Table `paymybuddy_db`.`transactions`

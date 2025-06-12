@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 
@@ -15,7 +16,9 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Transaction {
+public class Transaction implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @Column(name = "id_transaction")

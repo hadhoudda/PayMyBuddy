@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,7 +15,9 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Compte {
+public class Compte implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -30,15 +33,15 @@ public class Compte {
 
     //relation between table compte and transaction
     @OneToMany(mappedBy = "compteSender",// nom de l'attribut dans class Compte
-            cascade = CascadeType.ALL,
+            cascade = CascadeType.PERSIST,
             orphanRemoval = true,
             fetch = FetchType.EAGER)
-    private Set<Transaction> compteSenders = new HashSet<>();
+    private Set<Transaction> transactionSenders = new HashSet<>();
 
     @OneToMany(mappedBy = "compteReciever",// nom de l'attribut dans class Compte
-            cascade = CascadeType.ALL,
+            cascade = CascadeType.PERSIST,
             orphanRemoval = true,
             fetch = FetchType.EAGER)
-    private Set<Connection> compteReciever = new HashSet<>();
+    private Set<Transaction> transactionRecievers = new HashSet<>();
 
 }
