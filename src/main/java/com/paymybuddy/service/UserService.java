@@ -1,6 +1,7 @@
 package com.paymybuddy.service;
 
 
+import com.paymybuddy.model.Compte;
 import com.paymybuddy.model.User;
 import com.paymybuddy.repository.UserRepository;
 import com.paymybuddy.service.contracts.IUserService;
@@ -35,6 +36,9 @@ public class UserService implements IUserService {
 
     @Override
     public User createUser(User user) {
+        for (Compte compte : user.getComptes()) {
+            compte.setUser(user);
+        }
         return userRepository.save(user);
     }
 
@@ -57,6 +61,11 @@ public class UserService implements IUserService {
         } else {
             userRepository.deleteById(id);
         }
+    }
+
+    @Override
+    public List<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
 }

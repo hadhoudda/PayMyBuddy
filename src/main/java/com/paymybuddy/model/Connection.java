@@ -2,16 +2,15 @@ package com.paymybuddy.model;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "connections")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Connection implements Serializable {
@@ -20,7 +19,7 @@ public class Connection implements Serializable {
 
     @Id
     @Column(name = "id_connection")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int connectionId;
 
     @Column(name = "date_connection")
@@ -28,11 +27,11 @@ public class Connection implements Serializable {
 
     //relation between table connection and user
     @ManyToOne
-    @JoinColumn(name = "fk_id_user_owner", nullable = false)
+    //@JoinColumn(name = "fk_id_user_owner", nullable = false)
     private User ownerUser;
 
     @ManyToOne
-    @JoinColumn(name = "fk_id_user_friend", nullable = false)
+    //@JoinColumn(name = "fk_id_user_friend", nullable = false)
     private User friendUser;
 
 }

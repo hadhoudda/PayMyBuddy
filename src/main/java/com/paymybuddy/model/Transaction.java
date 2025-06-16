@@ -1,10 +1,7 @@
 package com.paymybuddy.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -12,7 +9,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "transactions")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,7 +20,7 @@ public class Transaction implements Serializable {
 
     @Id
     @Column(name = "id_transaction")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int transactionId;
 
     @Column(name = "description")
@@ -36,10 +34,10 @@ public class Transaction implements Serializable {
 
     //relation between table transaction and compte
     @ManyToOne
-    @JoinColumn(name = "fk_id_compte_sender")
+    //@JoinColumn(name = "fk_id_compte_sender")
     private Compte compteSender;
 
     @ManyToOne
-    @JoinColumn(name = "fk_id_compte_reciever")
+    //@JoinColumn(name = "fk_id_compte_reciever")
     private Compte compteReciever;
 }
