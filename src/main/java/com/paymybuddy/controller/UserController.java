@@ -1,40 +1,53 @@
 package com.paymybuddy.controller;
 
-import com.paymybuddy.model.Compte;
+import com.paymybuddy.dto.UserDto;
 import com.paymybuddy.model.User;
 import com.paymybuddy.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collections;
-import java.util.ConcurrentModificationException;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
-import java.util.logging.ErrorManager;
 
-@RestController
-@RequestMapping("/paymybuddy/utilisateur")
+
+
+@Controller
+@RequestMapping("/paymybuddy")
 public class UserController {
 
     @Autowired
     private UserService userService;
 
-    @GetMapping
-    public  List<User> getUsers(){
-       return userService.getAllUsers();
+
+    @GetMapping("/login")
+    public String showLoginForm(Model model) {
+        model.addAttribute("user", new UserDto());
+        return "login"; // nom du fichier .html
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<User>  getUserById(@PathVariable int id){
-        User user = userService.findUserById(id);
-        if(user==null){
-            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(user, HttpStatus.OK);
-    }
+//    @GetMapping("/login")
+//    public String login(Model model) {
+//        model.addAttribute("users", userService.getAllUsers());
+//        return "login";
+//    }
+//    @GetMapping("/utilisateur")
+//    public  List<User> getUsers(){
+//       return userService.getAllUsers();
+//    }
+//
+//    @GetMapping("/utilisateur/{id}")
+//    public ResponseEntity<User>  getUserById(@PathVariable int id){
+//        User user = userService.findUserById(id);
+//        if(user==null){
+//            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+//        }
+//        return new ResponseEntity<>(user, HttpStatus.OK);
+//    }
 
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<User> postUser(@RequestBody User user){
         User userCreat = userService.createUser(user);
         if(userCreat.getEmail().equals(user.getEmail())){
@@ -49,12 +62,12 @@ public class UserController {
         return userService.updateUser(user);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/utilisateur/{id}")
     public void deleteUser(@PathVariable int id){
         userService.deleteUser(id);
     }
 
-    @GetMapping("/relation/{email}")
+    @GetMapping("/utilisateur/relation/{email}")
     public ResponseEntity<List<User>> getUserByEmail(@PathVariable String email) {
         try {
             List<User> userList = userService.findByEmail(email);

@@ -21,7 +21,7 @@ public class Transaction implements Serializable {
     @Id
     @Column(name = "id_transaction")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int transactionId;
+    private long transactionId;
 
     @Column(name = "description")
     private String transactionDescription;
@@ -32,12 +32,12 @@ public class Transaction implements Serializable {
     @Column(name = "date_transaction")
     private LocalDateTime transactionDate;
 
-    //relation between table transaction and compte
+    //relation between table transaction and user
     @ManyToOne
-    //@JoinColumn(name = "fk_id_compte_sender")
-    private Compte compteSender;
+    @JoinColumn(name = "user_id_sender")
+    private User userSender;
 
     @ManyToOne
-    //@JoinColumn(name = "fk_id_compte_reciever")
-    private Compte compteReciever;
+    @JoinColumn(name = "user_id_reciever")
+    private User userReciever;
 }

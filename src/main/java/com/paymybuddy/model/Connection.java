@@ -27,11 +27,11 @@ public class Connection implements Serializable {
 
     //relation between table connection and user
     @ManyToOne
-    //@JoinColumn(name = "fk_id_user_owner", nullable = false)
+    @JoinColumn(name = "user_id_owner", nullable = false)
     private User ownerUser;
 
     @ManyToOne
-    //@JoinColumn(name = "fk_id_user_friend", nullable = false)
+    @JoinColumn(name = "user_id_friend", nullable = false)
     private User friendUser;
 
 }

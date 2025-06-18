@@ -1,10 +1,12 @@
 package com.paymybuddy.service;
 
 
-import com.paymybuddy.model.Compte;
+import com.paymybuddy.model.Transaction;
 import com.paymybuddy.model.User;
 import com.paymybuddy.repository.UserRepository;
 import com.paymybuddy.service.contracts.IUserService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,7 @@ import java.util.Optional;
 @Transactional
 public class UserService implements IUserService {
 
+    private static final Logger logger = LogManager.getLogger(UserService.class);
     @Autowired
     private UserRepository userRepository;
 
@@ -25,7 +28,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public User findUserById(int id) {
+    public User findUserById(long id) {
         Optional<User> optionalUser = userRepository.findById(id);
         if(optionalUser.isEmpty()){
             return null;
@@ -36,11 +39,26 @@ public class UserService implements IUserService {
 
     @Override
     public User createUser(User user) {
-        for (Compte compte : user.getComptes()) {
-            compte.setUser(user);
+        try {
+            //verifie si l'utilisateur exixte ou non avant la creation
+            List<User> userList = userRepository.findByEmail(user.getEmail());
+
+            if (userList.isEmpty()) {
+//                for (Transaction transaction : user.getTransactions()) {
+//                    transaction.;
+//                }
+                return userRepository.save(user);
+            }else {
+                logger.error("user is exist");
+                return null;
+            }
+        } catch (Exception e) {
+            logger.error("Error adding user: {}", e.getMessage());
+            return null;
         }
-        return userRepository.save(user);
+
     }
+
 
     @Override
     public User updateUser(User user) {
@@ -54,7 +72,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public void deleteUser(int id) {
+    public void deleteUser(long id) {
         Optional<User> optionalUser = userRepository.findById(id);
         if(optionalUser.isEmpty()){
             System.out.println("user not found");
