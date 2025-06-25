@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html
+        layout:decorate="~{template1}"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Relation- PayMyBuddy</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-center align-items-center centered-form">
+        <form class="d-flex align-items-start gap-3  " role="form">
+            <div style="width: 300px;">
+                <label for="email" class="form-label fw-bold">Chercher une relation</label>
+                <input type="email" th:value="${email}" id="email" class="form-control" placeholder="Saisir une adresse mail" required>
+            </div>
+            <button type="submit" class="btn bg-orange btn-sm align-self-end">Ajouter</button>
+        </form>
+    </div>
+
+
+</div>
+
+</body>
+</html>
+

@@ -1,4 +1,10 @@
 package com.paymybuddy.service.contracts;
 
+import com.paymybuddy.model.Transaction;
+import org.springframework.data.domain.Page;
+
 public interface ITransactionService {
+
+    Page<Transaction> displayTransaction(long userId, int page, int size);
+    public void transfertAmount(long idSource, long idCible, double montant);
 }

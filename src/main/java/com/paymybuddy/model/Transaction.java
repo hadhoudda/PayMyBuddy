@@ -21,7 +21,7 @@ public class Transaction implements Serializable {
     @Id
     @Column(name = "id_transaction")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long transactionId;
+    private Long transactionId;
 
     @Column(name = "description")
     private String transactionDescription;
@@ -34,10 +34,10 @@ public class Transaction implements Serializable {
 
     //relation between table transaction and user
     @ManyToOne
-    @JoinColumn(name = "user_id_sender")
+    @JoinColumn(name = "user_id_sender", nullable = false)
     private User userSender;
 
     @ManyToOne
-    @JoinColumn(name = "user_id_reciever")
-    private User userReciever;
+    @JoinColumn(name = "user_id_receiver", nullable = false)
+    private User userReceiver;
 }

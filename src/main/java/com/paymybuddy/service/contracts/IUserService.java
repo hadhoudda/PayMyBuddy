@@ -1,20 +1,21 @@
 package com.paymybuddy.service.contracts;
 
+import com.paymybuddy.dto.UserRegisterDto;
 import com.paymybuddy.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IUserService {
 
-    //methode Crud classique
     List<User> getAllUsers();
-    User findUserById(long id);
-    User createUser(User user);
+    Optional<User> findUserById(long id);
+    User createUser(UserRegisterDto userDto);
     User updateUser(User user);
     void deleteUser(long id);
-
-    //methode crud avance
-    List<User> findByEmail(String email);
-
+    //Optional<User> findByEmail(String email);
+    void verseSolde(long idUser, double montant);
+    //void transfertAmount(long idSource, long idCible, double montant);
 
 }
+

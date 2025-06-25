@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{template1}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Trasfert - PayMyBuddy</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <section>
+        <form class="row gx-3 gy-2 align-items-center">
+            <div class="col-sm-3">
+                <label class="visually-hidden" for="specificSizeSelect">Preference</label>
+                <select class="form-select" id="specificSizeSelect">
+                    <option selected>Sélectionner une relation</option>
+                    <option value="1">One</option>
+                    <option value="2">Two</option>
+                </select>
+            </div>
+
+            <div class="col-sm-3">
+                <label class="visually-hidden" for="specificSizeInputName">Name</label>
+                <input type="text" class="form-control" id="specificSizeInputName" placeholder="Description">
+            </div>
+
+            <div class="col-sm-3">
+                <label for="amount">
+                    <input type="number" min="0.01" step="0.01" placeholder="0.00 €" id="amount" name="amount" th:value="${amount}" required>
+                </label>
+
+            </div>
+
+
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Payer</button>
+            </div>
+        </form>
+
+
+
+    </section>
+    <section class="py-5 my-5">
+    <h4> Mes Transactions</h4>
+    <div class="table-responsive">
+        <table class="table  table-bordered border-1">
+            <thead>
+            <tr>
+                <th>Relations</th>
+                <th>Description</th>
+                <th>Montant</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tbody>
+            <tr>
+                <td>Marie</td>
+                <td>vacance</td>
+                <td>1320</td>
+            </tr>
+            <tr>
+                <td>Jean</td>
+                <td>restaurant</td>
+                <td>95</td>
+            </tr>
+            <tr>
+                <td>Sophie</td>
+                <td>don</td>
+                <td>35</td>
+            </tr>
+            </tbody>
+<!--                <tr th:each="transaction : ${transactions}">-->
+
+<!--                    <td th:text="${transaction.userReceiver.userName }"></td>-->
+<!--                    <td th:text="${transaction.transactionDescription}"></td>-->
+<!--                    <td th:text="${transaction.transactionAmount}"></td>-->
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    </section>
+
+
+
+
+</div>
+
+</body>
+</html>
