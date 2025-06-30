@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,8 +31,8 @@ public class UserService implements IUserService {
     private UserRepository userRepository;
     private final UserLoginMapper userLoginMapper;
     private final UserRegisterMapper userRegisterMapper;
-//    @Autowired
-//    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository, UserLoginMapper userLoginMapper, UserRegisterMapper userRegisterMapper) {
         this.userRepository = userRepository;
@@ -60,10 +61,10 @@ public class UserService implements IUserService {
             throw new IllegalArgumentException("Le mot de passe est obligatoire");
         }
 
-//        // Hacher le mot de passe AVANT de le convertir ou sauvegarder
-//        String hashedPassword = passwordEncoder.encode(userRegisterDto.getPassword());
-//        userRegisterDto.setPassword(hashedPassword);
-//        // on convertit en entité (avec le mot de passe hashé)
+        // Crypter le mot de passe
+        String encodedPassword = passwordEncoder.encode(userRegisterDto.getPassword());
+        userRegisterDto.setPassword(encodedPassword);
+        // on convertit en entité (avec le mot de passe hashé)
         User user = userRegisterMapper.toEntity(userRegisterDto);
         logger.info("Utilisateur ajouté avec succès : {}", user.getEmail());
         user.setDateCreate(LocalDateTime.now());//enregistre date de creation
