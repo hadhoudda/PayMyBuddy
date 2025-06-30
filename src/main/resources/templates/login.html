@@ -32,7 +32,7 @@
                 </div>
                 <div class="card-body">
 
-                    <form class="w-75 mx-auto " th:action="@{/paymybuddy/profil}" th:object="${user}" method="post">
+                    <form class="w-75 mx-auto " th:action="@{/paymybuddy/profil}" th:object="${userLoginDto}" method="post">
                         <div class="mb-3 ">
                             <label for="mail" class="visually-hidden">Mail</label>
                             <input type="text" th:field="*{mail}" class="form-control " id="mail" placeholder="Mail" required>

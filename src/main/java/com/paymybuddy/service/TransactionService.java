@@ -6,7 +6,6 @@ import com.paymybuddy.repository.TransactionRepository;
 import com.paymybuddy.repository.UserRepository;
 import com.paymybuddy.service.contracts.ITransactionService;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,7 +18,7 @@ import java.time.LocalDateTime;
 
 @Service
 @Transactional
-public class TransactionServiceImpl implements ITransactionService {
+public class TransactionService implements ITransactionService {
 
     @Autowired
     private final TransactionRepository transactionRepository;
@@ -28,7 +27,7 @@ public class TransactionServiceImpl implements ITransactionService {
     private final UserRepository userRepository;
 
     @Autowired
-    public TransactionServiceImpl(TransactionRepository transactionRepository, UserRepository userRepository) {
+    public TransactionService(TransactionRepository transactionRepository, UserRepository userRepository) {
         this.transactionRepository = transactionRepository;
         this.userRepository = userRepository;
     }

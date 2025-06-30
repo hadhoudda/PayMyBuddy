@@ -1,26 +1,13 @@
 package com.paymybuddy.service;
 
 
-import com.paymybuddy.dto.ContactDto;
-import com.paymybuddy.mapper.ContactMapper;
-import com.paymybuddy.model.Contact;
-import com.paymybuddy.model.User;
-import com.paymybuddy.repository.ContactRepository;
-import com.paymybuddy.repository.UserRepository;
 import com.paymybuddy.service.contracts.IContactService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 @Service
 @Transactional
-public class ContactServiceImpl implements IContactService {
+public class ContactService implements IContactService {
 //
 ////    @Autowired
 ////    ContactRepository contactRepository;

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:th="http://www.thymeleaf.org">
+<html
+        xmlns:th="http://www.thymeleaf.org">
 
 <head>
   <meta charset="UTF-8">
@@ -32,33 +32,57 @@
               <h3 class="bg-orange d-inline-block px-4 py-3 w-50 text-center mx-auto ">Pay My Buddy</h3>
             </div>
             <div class="card-body">
-              <form class="w-75 mx-auto " th:action="@{/paymybuddy/profil}" th:object="${user}" method="post">
+              <form class="w-75 mx-auto " method="post" th:action="@{/paymybuddy/register}"
+                    th:object="${userRegisterDto}">
                 <div class="mb-3">
                   <label for="userName" class="visually-hidden">Username</label>
-                  <input type="text" th:field="*{userName}" class="form-control" id="userName" placeholder="Username" required>
+                  <input class="form-control" id="userName" placeholder="Username" th:field="*{userName}" type="text">
+                  <!--  afficher des erreurs de username-->
+                  <div class="text-danger mt-1"
+                       th:errors="*{userName}"
+                       th:if="${#fields.hasErrors('userName')}">
+                  </div>
                 </div>
-
                 <div class="mb-3">
                   <label for="email" class="visually-hidden">Mail</label>
-                  <input type="text" th:field="*{email}" class="form-control" id="email" placeholder="Mail" required>
+                  <input class="form-control" id="email" placeholder="Mail" th:field="*{email}" type="text">
+                  <!-- afficher des erreurs de email-->
+                  <div class="text-danger mt-1"
+                       th:errors="*{email}"
+                       th:if="${#fields.hasErrors('email')}">
+                  </div>
+                  <!-- Message d'erreur mail existe -->
+                  <div class="text-danger mt-1" th:if="${emailError}">
+                    <span th:text="${emailError}"></span>
+                  </div>
                 </div>
 
                 <div class="mb-3">
                   <label for="password" class="visually-hidden">Mot de passe</label>
-                  <input type="password" th:field="*{password}" class="form-control" id="password" placeholder="Mot de passe" required>
+                  <input class="form-control" id="password" placeholder="Mot de passe" th:field="*{password}"
+                         type="password">
+                  <!-- afficher des erreurs de password-->
+                  <div class="text-danger mt-1"
+                       th:errors="*{password}"
+                       th:if="${#fields.hasErrors('password')}">
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label class="visually-hidden" for="confirmPassword">Confirmez le mot de passe</label>
+                  <input class="form-control" id="confirmPassword" placeholder="Confirmez mot de passe" th:field="*{confirmPassword}"
+                         type="password">
+                  <!-- afficher des erreurs de confirmation password-->
+                  <div class="text-danger mt-1"
+                       th:errors="*{confirmPassword}"
+                       th:if="${#fields.hasErrors('confirmPassword')}">
+                  </div>
                 </div>
                 <div class="text-center">
                   <button type="submit" class="btn btn-primary px-4 py-2 w-50">
                     S’inscrire
                   </button>
                 </div>
-
-
               </form>
-
-
-
-
             </div>
 
           </div>

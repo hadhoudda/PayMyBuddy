@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/paymybuddy")
 public class RegisterController {
 
-    @GetMapping("/register")
-    public String register(Model model) {
-        model.addAttribute("user", new User());
-        return "register";
-    }
+//    @GetMapping("/register")
+//    public String register(Model model) {
+//        model.addAttribute("user", new User());
+//        return "register";
+//    }
 
 }

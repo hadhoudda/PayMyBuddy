@@ -8,13 +8,15 @@ import java.util.Optional;
 
 public interface IUserService {
 
-    List<User> getAllUsers();
-    Optional<User> findUserById(long id);
     User createUser(UserRegisterDto userDto);
-    User updateUser(User user);
-    void deleteUser(long id);
+    Optional<User> findUserByEmail(String email);
+    //List<User> getAllUsers();
+    //Optional<User> findUserById(long id);
+
+    //User updateUser(User user);
+    //void deleteUser(long id);
     //Optional<User> findByEmail(String email);
-    void verseSolde(long idUser, double montant);
+    //void verseSolde(long idUser, double montant);
     //void transfertAmount(long idSource, long idCible, double montant);
 
 }
