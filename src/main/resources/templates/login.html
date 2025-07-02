@@ -24,6 +24,10 @@
 <section class="bg-light ">
 
 <div class="container mt-5">
+    <!-- Message de confirmation après déconnexion -->
+    <div th:if="${param.logout}" class="alert alert-success text-center">
+        Vous avez été déconnecté avec succès.
+    </div>
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card shadow">
@@ -32,19 +36,24 @@
                 </div>
                 <div class="card-body">
 
-                    <form class="w-75 mx-auto " th:action="@{/paymybuddy/profil}" th:object="${userLoginDto}" method="post">
+                    <form class="w-75 mx-auto " th:action="@{/login}" method="post">
                         <div class="mb-3 ">
                             <label for="mail" class="visually-hidden">Mail</label>
-                            <input type="text" th:field="*{mail}" class="form-control " id="mail" placeholder="Mail" required>
+                            <input type="text" name="username" class="form-control" id="mail" placeholder="Mail" required>
+                            <!--  name="username" car spring security il attend par defaut username-->
                         </div>
                         <div class="mb-3 ">
                             <label for="password" class="visually-hidden">Mot de passe</label>
-                            <input type="password" th:field="*{password}" class="form-control " id="password" placeholder="Mot de passe" required>
+                            <input type="password" name="password" class="form-control" id="password" placeholder="Mot de passe" required>
+                            <!--  name="password" car spring security il attend par defaut password-->
                         </div>
                         <div class="text-center">
                             <button type="submit" class="btn btn-primary px-4 py-3 w-50">
                                 Se connecter
                             </button>
+                        </div>
+                        <div th:if="${param.error}" class="alert alert-danger text-center py-2 m-3">
+                            Email ou mot de passe invalide.
                         </div>
 
                     </form>

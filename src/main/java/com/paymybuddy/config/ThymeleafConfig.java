@@ -10,6 +10,7 @@ public class ThymeleafConfig {
 
     @Bean
     public LayoutDialect layoutDialect() {
+
         return new LayoutDialect();
     }
 }

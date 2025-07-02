@@ -6,6 +6,9 @@ import com.paymybuddy.service.contracts.IUserService;
 import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -23,9 +26,13 @@ public class UserController {
     private static final Logger logger = LogManager.getLogger(UserController.class);
 
     private final IUserService userService;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
 
-    public UserController(IUserService userService) {
+    public UserController(IUserService userService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
     }
 
     //affiche page web form login
@@ -56,7 +63,7 @@ public class UserController {
             @ModelAttribute("userRegisterDto") @Valid UserRegisterDto userRegisterDto,
             BindingResult result,
             RedirectAttributes redirectAttributes) {
-//confirmation que les mots de passe identique
+            //confirmation que les mots de passe identique
         if (!userRegisterDto.getPassword().equals(userRegisterDto.getConfirmPassword())) {
             result.rejectValue("confirmPassword", "error.user", "Les mots de passe ne correspondent pas.");
         }
@@ -84,13 +91,9 @@ public class UserController {
 
         return "redirect:/paymybuddy/register/confirmed";
     }
+
 }
 
-
-//    @GetMapping("/connecte")// ajoute methode de connecte au service
-//    private ResponseEntity<String> connectUser(){
-//        return ResponseEntity.ok("user connecte");
-//    }
 //
 //    @GetMapping("/users")
 //    public ResponseEntity<List<User>> getUsers() {
@@ -164,5 +167,6 @@ public class UserController {
 ////            return ResponseEntity.noContent().build();
 ////        }
 ////    }
+
 
 
