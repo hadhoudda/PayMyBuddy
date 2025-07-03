@@ -1,16 +1,13 @@
 package com.paymybuddy.service;
 
+import com.paymybuddy.config.CustomUserDetails;
 import com.paymybuddy.model.User;
 import com.paymybuddy.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -26,10 +23,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("L'utilisateur n'existe pas"));
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                new ArrayList<>() // ou liste des rôles si vous en avez
-        );
+        return new CustomUserDetails(user);
     }
 }
