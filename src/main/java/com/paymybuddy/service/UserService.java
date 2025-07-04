@@ -1,6 +1,7 @@
 package com.paymybuddy.service;
 
 
+import com.paymybuddy.config.CustomUserDetails;
 import com.paymybuddy.dto.UserRegisterDto;
 import com.paymybuddy.mapper.UserLoginMapper;
 import com.paymybuddy.mapper.UserRegisterMapper;
@@ -12,6 +13,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -110,22 +113,68 @@ public class UserService implements IUserService {
 //    }
 //
 //
-//    @Override
-//    public void verseSolde(long idUser, double montant) {
-//        if (montant <= 0) {
-//            throw new IllegalArgumentException("Le montant doit être supérieur à zéro.");
-//        }
-//
-//        User user = userRepository.findById(idUser)
-//                .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé avec l'ID : " + idUser));
-//
-//        BigDecimal montantAjoute = BigDecimal.valueOf(montant);
-//        BigDecimal soldeActuel = user.getSolde() != null ? user.getSolde() : BigDecimal.ZERO;
-//        BigDecimal nouveauSolde = soldeActuel.add(montantAjoute);
-//
-//        user.setSolde(nouveauSolde);
-//        userRepository.save(user);
-//    }
+    // ajouter solde
+    @Override
+    public void verseSolde(double montant) {
+        if (montant <= 0) {
+            throw new IllegalArgumentException("Le montant doit être supérieur à zéro.");
+        }
+
+        // Récupération de l'utilisateur connecté via SecurityContext
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("Utilisateur non authentifié.");
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+
+        // Mise à jour du solde
+        BigDecimal montantAjoute = BigDecimal.valueOf(montant);
+        BigDecimal soldeActuel = user.getSolde() != null ? user.getSolde() : BigDecimal.ZERO;
+        BigDecimal nouveauSolde = soldeActuel.add(montantAjoute);
+
+        user.setSolde(nouveauSolde);
+        userRepository.save(user);
+    }
+
+    //modifier username
+    @Override
+    public void updateUserName(String userName) {
+        // Récupération de l'utilisateur connecté via SecurityContext
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("Utilisateur non authentifié.");
+        }
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+
+        // Mise à jour userName
+        user.setUserName(userName);
+        userRepository.save(user);
+
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser() {
+        // Récupération de l'utilisateur connecté via SecurityContext
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("Utilisateur non authentifié.");
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getUser().getUserId();
+
+        //Recharge l'utilisateur depuis la base dans la transaction
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable."));
+
+        // ✅ Supprime une entité attachée (gérée par Hibernate)
+        userRepository.delete(user);
+    }
+
 //////////////////////////////////////////////////////
 //    @Override
 //    public void transfertAmount(long idSource, long idCible, double montant) {

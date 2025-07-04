@@ -14,9 +14,10 @@ public interface IUserService {
     //Optional<User> findUserById(long id);
 
     //User updateUser(User user);
-    //void deleteUser(long id);
     //Optional<User> findByEmail(String email);
-    //void verseSolde(long idUser, double montant);
+    void verseSolde(double montant);
+    void updateUserName(String userName);
+    void deleteUser();
     //void transfertAmount(long idSource, long idCible, double montant);
 
 }

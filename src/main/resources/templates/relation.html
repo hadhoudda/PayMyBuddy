@@ -10,19 +10,29 @@
 
 <body>
 <div layout:fragment="content">
+
+    <!-- message de succès -->
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+    <!-- message d'erreur -->
+    <div th:if="${emailError}" class="alert alert-danger" th:text="${emailError}"></div>
+
     <div class="d-flex justify-content-center align-items-center centered-form">
-        <form class="d-flex align-items-start gap-3  " role="form">
+        <form class="d-flex align-items-start gap-3" th:action="@{/paymybuddy/relation}" th:object="${contactDto}" method="post">
             <div style="width: 300px;">
                 <label for="email" class="form-label fw-bold">Chercher une relation</label>
-                <input type="email" th:value="${email}" id="email" class="form-control" placeholder="Saisir une adresse mail" required>
+                <input type="email"
+                       id="email"
+                       th:field="*{email}"
+                       class="form-control"
+                       placeholder="Saisir une adresse mail"
+                       required>
             </div>
             <button type="submit" class="btn bg-orange btn-sm align-self-end">Ajouter</button>
         </form>
     </div>
 
-
 </div>
-
 </body>
 </html>
 

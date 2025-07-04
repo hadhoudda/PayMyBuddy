@@ -109,12 +109,7 @@ public class UserController {
 //
 //
 //
-//    // ajoute solde
-//    @PutMapping("/solde/{idUser}/{montant}")
-//    public ResponseEntity<String> addSolde(@PathVariable long idUser, @PathVariable double montant){
-//        userService.verseSolde(idUser, montant);
-//        return ResponseEntity.ok("solde ajoute");
-//    }
+
 //
 //
 //

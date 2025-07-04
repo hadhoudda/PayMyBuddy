@@ -1,30 +1,67 @@
 package com.paymybuddy.controller;
 
+import com.paymybuddy.dto.ContactDto;
+import com.paymybuddy.dto.UserRegisterDto;
+import com.paymybuddy.service.ContactService;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 
 @Controller
 @RequestMapping("/paymybuddy")
 public class ContactController {
+
+    private final ContactService contactService;
+
+    public ContactController(ContactService contactService) {
+        this.contactService = contactService;
+    }
+
     @GetMapping("/relation")
-    public String relation() {
+    public String relation(Model model) {
+            if (!model.containsAttribute("contactDto")) {
+                model.addAttribute("contactDto", new ContactDto());
+            }
         return "relation";
     }
-//
-//    private static final Logger logger = LogManager.getLogger(ContactController.class);
-//
-//    @Autowired
-//    ContactServiceImpl contactService;
-//    @Autowired
-//    UserServiceImpl userService;
-//
-//
-////
-//    @GetMapping("/contact/test")
-//    private ResponseEntity<Iterable<User>> getTestFriend(User user){
-//        Iterable<User> userList= contactService.getFriendsByUserId(user.getUserId());
-//        return ResponseEntity.ok((userList));
-//    }
+
+    @PostMapping("/relation")
+    public String addContact(
+            @ModelAttribute("contactDto") @Valid ContactDto contactDto,
+            BindingResult result,
+            RedirectAttributes redirectAttributes) {
+
+        // Ajouter la date de création
+        contactDto.setDateCreate(LocalDateTime.now());
+
+        // Vérifie les erreurs de validation
+        if (result.hasErrors()) {
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.contactDto", result);
+            redirectAttributes.addFlashAttribute("contactDto", contactDto);
+            return "redirect:/paymybuddy/relation";
+        }
+
+        try {
+            // Appel au service pour ajouter un nouveau contact
+            contactService.addNewContact(contactDto.getEmail());
+        } catch (IllegalArgumentException | IllegalStateException | NoSuchElementException e) {
+            // Gestion des erreurs
+            redirectAttributes.addFlashAttribute("contactDto", contactDto);
+            redirectAttributes.addFlashAttribute("emailError", e.getMessage());
+            return "redirect:/paymybuddy/relation";
+        }
+        redirectAttributes.addFlashAttribute("successMessage", "Contact ajouté avec succès !");//message affiche au vue
+        return "redirect:/paymybuddy/relation";
+    }
+
+}
+
 //
 //    @GetMapping("/{id}")
 //    public ResponseEntity<List<User>> getFriends(@PathVariable long id) {
@@ -49,21 +86,3 @@ public class ContactController {
 //    }
 //
 ////
-//    @PostMapping("/{id}")
-//    public ResponseEntity<Contact> addNewContact(@PathVariable long id,
-//                                                 @RequestParam String email) {
-//        try {
-//            Contact contact = contactService.createContact(id, email);
-//            logger.info("Contact ajouté avec succès.");
-//            return ResponseEntity.ok(contact);
-//        } catch (NoSuchElementException | IllegalStateException e) {
-//            logger.warn("Erreur lors de l'ajout du contact : {}", e.getMessage());
-//            return ResponseEntity.badRequest().build();
-//        } catch (Exception e) {
-//            logger.error("Erreur serveur : {}", e.getMessage());
-//            return ResponseEntity.internalServerError().build();
-//        }
-//    }
-
-
-}

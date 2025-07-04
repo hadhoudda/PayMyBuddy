@@ -11,8 +11,10 @@ import java.util.Optional;
 
 public interface IContactService {
 
+    Contact addNewContact(String email);
+
 //    List<User> getAllContacts(long idUser);
-//    Contact createContact(long idUser, String email);
+//
 //    void deleteContact(long idUser, String email);
 //    Optional<Contact> findByIdUserAndEmail(long idUser, String emailContact);
 //
