@@ -29,25 +29,32 @@ public class ProfilController {
         this.userService = userService;
     }
 
+
     @GetMapping("/profil")
     public String showProfil(
             HttpServletResponse response,
             Model model,
             @AuthenticationPrincipal UserDetails userDetails) {
 
+        // empêcher le cache du navigateur
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         response.setHeader("Pragma", "no-cache");
         response.setDateHeader("Expires", 0);
-
-        String email = userDetails.getUsername();
-        Optional<User> optionalUser = userService.findUserByEmail(email);
-
-        if (optionalUser.isPresent()) {
-            model.addAttribute("user", optionalUser.get());
-        } else {
+        // Vérifier si l'utilisateur est connecté
+        if (userDetails == null) {
             return "redirect:/paymybuddy";
         }
 
+        String email = userDetails.getUsername();
+        Optional<User> optionalUser = userService.findUserByEmail(email);
+        logger.info("Profil demandé pour : {}", email);
+
+        //if (optionalUser.isPresent()) {
+        if (optionalUser.isEmpty()) {
+            return "redirect:/paymybuddy";
+        }
+        model.addAttribute("user", optionalUser.get());
+        logger.info("Connexion de : " + userDetails.getUsername());
         return "profil";
     }
 
@@ -77,16 +84,17 @@ public class ProfilController {
         return "redirect:/paymybuddy/profil";
     }
 
-    // modifier username
+    // supprime compte
     @PostMapping("/profil/delete")
-    public String deleteUser( RedirectAttributes redirectAttributes) {
+    public String deleteUser(RedirectAttributes redirectAttributes) {
         try {
             userService.deleteUser();
-            redirectAttributes.addFlashAttribute("success", "Utilisateur supprimé  avec succès !");
+            redirectAttributes.addFlashAttribute("successMessage", "Utilisateur supprimé avec succès !");
+            return "redirect:/paymybuddy";
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/paymybuddy";
         }
-        return "redirect:/paymybuddy";
     }
 
 }

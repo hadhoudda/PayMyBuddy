@@ -3,7 +3,6 @@ package com.paymybuddy.service;
 
 import com.paymybuddy.config.CustomUserDetails;
 import com.paymybuddy.dto.UserRegisterDto;
-import com.paymybuddy.mapper.UserLoginMapper;
 import com.paymybuddy.mapper.UserRegisterMapper;
 import com.paymybuddy.model.User;
 import com.paymybuddy.repository.UserRepository;
@@ -12,7 +11,6 @@ import jakarta.persistence.EntityNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -32,14 +29,12 @@ public class UserService implements IUserService {
 
     @Autowired
     private UserRepository userRepository;
-    private final UserLoginMapper userLoginMapper;
     private final UserRegisterMapper userRegisterMapper;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, UserLoginMapper userLoginMapper, UserRegisterMapper userRegisterMapper) {
+    public UserService(UserRepository userRepository, UserRegisterMapper userRegisterMapper) {
         this.userRepository = userRepository;
-        this.userLoginMapper = userLoginMapper;
         this.userRegisterMapper = userRegisterMapper;
     }
 
@@ -50,6 +45,7 @@ public class UserService implements IUserService {
         Optional<User> existingUser = userRepository.findByEmail(userRegisterDto.getEmail());
         logger.info("Création user, userName = '{}', email = '{}'", userRegisterDto.getUserName(), userRegisterDto.getEmail());
         if (existingUser.isPresent()) {
+            logger.error("Impossible de créer, un utilisateur avec cet email existe déjà");
             throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà");
         }
 
@@ -80,39 +76,6 @@ public class UserService implements IUserService {
         return userOptional;
     }
 
-//    @Override
-//    public User updateUser(User user) {
-//        // Vérifie si l'utilisateur existe selon l'ID
-//        Optional<User> existingUserOptional = userRepository.findById(user.getUserId());
-//        if (!existingUserOptional.isPresent()) {
-//            throw new IllegalArgumentException("User with this ID does not exist");
-//        }
-//
-//        // récupère l'utilisateur existant
-//        User existingUser = existingUserOptional.get();
-//
-//        // empêche la modification de l'email
-//        user.setEmail(existingUser.getEmail());
-//        // Garde la date de création inchangée
-//        user.setDateCreate(existingUser.getDateCreate());
-//
-//        logger.info("Successfully updated user (email and creation date unchanged)");
-//        return userRepository.save(user);
-//    }
-//
-//
-//    @Override
-//    public void deleteUser(long id) {
-//        //verify user is exist or no (selon id)
-//        Optional<User> existingUser = userRepository.findById(id);
-//        if (!existingUser.isPresent()) {
-//            throw new IllegalArgumentException("User with this ID does not exist");
-//        }
-//        logger.info("Successful deleted user");
-//        userRepository.deleteById(id);
-//    }
-//
-//
     // ajouter solde
     @Override
     public void verseSolde(double montant) {
@@ -123,19 +86,28 @@ public class UserService implements IUserService {
         // Récupération de l'utilisateur connecté via SecurityContext
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
+            logger.error("Utilisateur non authentifié.");
             throw new SecurityException("Utilisateur non authentifié.");
         }
-
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        User user = userDetails.getUser();
+        Long userId = userDetails.getUser().getUserId();
 
-        // Mise à jour du solde
-        BigDecimal montantAjoute = BigDecimal.valueOf(montant);
-        BigDecimal soldeActuel = user.getSolde() != null ? user.getSolde() : BigDecimal.ZERO;
-        BigDecimal nouveauSolde = soldeActuel.add(montantAjoute);
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable"));
 
-        user.setSolde(nouveauSolde);
-        userRepository.save(user);
+            BigDecimal montantAjoute = BigDecimal.valueOf(montant);
+            BigDecimal soldeActuel = user.getSolde() != null ? user.getSolde() : BigDecimal.ZERO;
+            BigDecimal nouveauSolde = soldeActuel.add(montantAjoute);
+
+            user.setSolde(nouveauSolde);
+            userRepository.save(user);
+            logger.info("Solde mis à jour avec succès pour l'utilisateur ID {}", userId);
+
+        } catch (org.springframework.orm.ObjectOptimisticLockingFailureException e) {
+            logger.error("Conflit de mise à jour concurrente pour l'utilisateur ID {}", userId);
+            throw new RuntimeException("Votre solde a été modifié par une autre opération. Veuillez réessayer.");
+        }
     }
 
     //modifier username
@@ -144,15 +116,25 @@ public class UserService implements IUserService {
         // Récupération de l'utilisateur connecté via SecurityContext
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
+            logger.error("Utilisateur non authentifié.");
             throw new SecurityException("Utilisateur non authentifié.");
         }
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        User user = userDetails.getUser();
+        Long userId = userDetails.getUser().getUserId();
 
-        // Mise à jour userName
-        user.setUserName(userName);
-        userRepository.save(user);
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable"));
 
+            // Mise à jour userName
+            user.setUserName(userName);
+            userRepository.save(user);
+
+            logger.info("Username modifié avec succès pour l'utilisateur ID {}", userId);
+        } catch (org.springframework.orm.ObjectOptimisticLockingFailureException e) {
+            logger.error("Conflit de mise à jour concurrente sur le user ID {}", userId);
+            throw new RuntimeException("Une autre opération a modifié votre compte. Veuillez réessayer.");
+        }
     }
 
     @Override
@@ -161,54 +143,27 @@ public class UserService implements IUserService {
         // Récupération de l'utilisateur connecté via SecurityContext
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
+            logger.info("Utilisateur non authentifié.");
             throw new SecurityException("Utilisateur non authentifié.");
         }
 
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUser().getUserId();
 
-        //Recharge l'utilisateur depuis la base dans la transaction
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable."));
+        try {
+            // Recharge l'utilisateur dans la même transaction
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable."));
 
-        // ✅ Supprime une entité attachée (gérée par Hibernate)
-        userRepository.delete(user);
+            // Suppression — le champ @Version sera vérifié
+            userRepository.delete(user);
+
+            logger.info("Utilisateur supprimé avec succès (ID {}).", userId);
+        } catch (org.springframework.orm.ObjectOptimisticLockingFailureException e) {
+            logger.error("Conflit de version lors de la suppression de l'utilisateur ID {}", userId);
+            throw new RuntimeException("Une autre opération a modifié votre compte. Suppression annulée.");
+        }
     }
-
-//////////////////////////////////////////////////////
-//    @Override
-//    public void transfertAmount(long idSource, long idCible, double montant) {
-//        if (montant <= 0) {
-//            throw new IllegalArgumentException("Le montant doit être supérieur à zéro.");
-//        }
-//
-//        User source = userRepository.findById(idSource)
-//                .orElseThrow(() -> new EntityNotFoundException("Expéditeur non trouvé avec l'ID : " + idSource));
-//
-//        User cible = userRepository.findById(idCible)
-//                .orElseThrow(() -> new EntityNotFoundException("Destinataire non trouvé avec l'ID : " + idCible));
-//
-//        BigDecimal montantTransfert = BigDecimal.valueOf(montant);
-//
-//        BigDecimal soldeSource = source.getSolde() != null ? source.getSolde() : BigDecimal.ZERO;
-//
-//        if (soldeSource.compareTo(montantTransfert) < 0) {
-//            throw new IllegalArgumentException("Solde insuffisant pour effectuer le transfert.");
-//        }
-//
-//        // Mise à jour des soldes
-//        source.setSolde(soldeSource.subtract(montantTransfert));
-//
-//        BigDecimal soldeCible = cible.getSolde() != null ? cible.getSolde() : BigDecimal.ZERO;
-//        cible.setSolde(soldeCible.add(montantTransfert));
-//
-//        // Sauvegarde des deux utilisateurs
-//        userRepository.save(source);
-//        userRepository.save(cible);
-//    }
-
-
 }
-
 
 

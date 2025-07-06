@@ -1,10 +1,11 @@
-package com.paymybuddy.model;
-
+package com.paymybuddy.model;//package com.paymybuddy.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
-
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -27,6 +28,10 @@ public class User implements Serializable {
     @Column(name = "id_user")
     private Long userId;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private Integer version;
+
     @Column(name = "user_name")
     @NotNull(message = "userName can not be null")
     private String userName;
@@ -35,37 +40,25 @@ public class User implements Serializable {
 
     private String password;
 
-    private BigDecimal solde= BigDecimal.ZERO;
+    private BigDecimal solde = BigDecimal.ZERO;
 
     @Column(name = "date_create")
     private LocalDateTime dateCreate;
 
+    @Column(name = "enabled")
+    private boolean enabled = true; //true: compte actif car pas de confirmation par mail
 
-    //relation between table  transaction and user
-    @OneToMany(mappedBy = "userSender", // nom de l'attribut dans class Transaction
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY)
+    // Transactions
+    @OneToMany(mappedBy = "userSender", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Transaction> transactionsSender = new HashSet<>();
 
-    @OneToMany(mappedBy = "userReceiver", // nom de l'attribut dans class Transaction
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "userReceiver", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Transaction> transactionsReceiver = new HashSet<>();
 
-
-    //relation between table  user and connection
-    @OneToMany(mappedBy = "ownerIdUser",// nom de l'attribut dans class Connection
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY)
+    // Contacts
+    @OneToMany(mappedBy = "ownerIdUser", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Contact> ownerContacts = new HashSet<>();
 
-    @OneToMany(mappedBy = "friendIdUser",// nom de l'attribut dans class Connection
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "friendIdUser", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Contact> friendContacts = new HashSet<>();
-
 }
