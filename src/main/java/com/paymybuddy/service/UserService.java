@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -100,7 +101,15 @@ public class UserService implements IUserService {
 
             BigDecimal montantAjoute = BigDecimal.valueOf(montant);
             BigDecimal soldeActuel = user.getSolde() != null ? user.getSolde() : BigDecimal.ZERO;
-            BigDecimal nouveauSolde = soldeActuel.add(montantAjoute);
+
+            // Multiplier par 0.95
+            BigDecimal tauxFrais = new BigDecimal("0.95");
+            BigDecimal montantAvecFrais = montantAjoute.multiply(tauxFrais);
+            //ajoute au solde apres reduction de 5%
+            BigDecimal nouveauSolde = soldeActuel.add(montantAvecFrais);
+
+            // Arrondi à 2 décimales
+            nouveauSolde = nouveauSolde.setScale(2, RoundingMode.HALF_UP);
 
             user.setSolde(nouveauSolde);
             userRepository.save(user);

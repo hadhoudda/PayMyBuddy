@@ -13,11 +13,8 @@ import java.util.Optional;
 public interface ContactRepository extends JpaRepository<Contact, Long> {
 
     Optional<Contact> findByOwnerIdUserAndFriendIdUser(User ownerUser, User friendUser);
-    //List<Contact> findByUserOwnerId(Long userId);
-
     // récupérer tous les contacts où l'utilisateur est le propriétaire
     List<Contact> findByOwnerIdUser(User ownerIdUser);
-
     // trouver les contacts où l'utilisateur est l'ami (friend)
     List<Contact> findByFriendIdUser(User friendIdUser);
 

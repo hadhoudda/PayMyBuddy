@@ -109,70 +109,33 @@ public class ContactService implements IContactService {
                 .collect(Collectors.toList());
     }
 
+    //supprime contact
+    @Override
+    public void deleteContact(String email) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("Utilisateur non authentifié.");
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User owner = userDetails.getUser();
+
+        Optional<User> friendOpt = userRepository.findByEmail(email);
+        if (friendOpt.isEmpty()) {
+            throw new NoSuchElementException("Aucun utilisateur trouvé avec l'email : " + email);
+        }
+
+        User friend = friendOpt.get();
+
+        Optional<Contact> contactOpt = contactRepository.findByOwnerIdUserAndFriendIdUser(owner, friend);
+        if (contactOpt.isEmpty()) {
+            throw new NoSuchElementException("Ce contact n'existe pas dans votre liste.");
+        }
+
+        contactRepository.delete(contactOpt.get());
+        logger.info("Contact supprimé : {} -> {}", owner.getEmail(), friend.getEmail());
+    }
+
+
 }
-
-
-//    private UserServiceImpl userService;
-
-//    @Autowired
-//    ContactServiceImpl contactService;
-//    private ContactMapper contactMapper;
-//
-////public Iterable<User> getFriendsUser(User user){
-////    return contactRepository.findByFriendContactsFriendIdUser(user);
-////}
-//
-////    public List<User> getFriendsByUserId(Long userId) {
-////        List<Contact> contacts = contactRepository.findByUserOwnerId(userId);
-////        return contacts.stream()
-////                .map(Contact::getFriendIdUser)
-////                .collect(Collectors.toList());
-////    }
-//
-////    @Override
-////    public List<Contact> getAllContacts(long idUser) {
-////        return getFriendsByUserId(i);
-////    }
-//
-////    @Override
-////    public List<User> getAllContacts(long idUser) {
-////        Optional<User> user = userService.findUserById(idUser);
-////        System.out.println(user.toString());
-////        List<Contact> contacts = contactRepository.findByUserOwnerId(idUser);
-////        System.out.println(contacts.toString());
-////        //List<long> listIdContact =
-////        return List.of();
-////    }
-
-//
-//
-//    @Override
-//    public List<User> getAllContacts(long idUser) {
-//        return List.of();
-//    }
-//
-//    @Override
-//    public Contact createContact(long idUser, String email) {
-//        return null;
-//    }
-//
-//    @Override
-//    public void deleteContact(long idUser, String email) {
-//
-//    }
-//
-//    @Override
-//    public Optional<Contact> findByIdUserAndEmail(long idUser, String emailContact) {
-//        return Optional.empty();
-//    }
-//
-//    @Override
-//    public boolean contactExists(String email) {
-//        return false;
-//    }
-//
-//    @Override
-//    public Contact createNewContactByEmail(long ownerUserId, String friendEmail) {
-//        return null;
-//    }
 

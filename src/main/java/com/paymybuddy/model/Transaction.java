@@ -1,8 +1,6 @@
 package com.paymybuddy.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.io.Serializable;
@@ -26,11 +24,8 @@ public class Transaction implements Serializable {
     private Long transactionId;
 
     @Column(name = "description")
-    @NotNull(message = "description can not be null")
-    @Size(min = 8, max = 100, message = "La description doit faire entre 8 et 100 caractères")
     private String transactionDescription;
 
-    @NotNull(message = "amount can not be null")
     @Column(name = "amount")
     private double transactionAmount;
 

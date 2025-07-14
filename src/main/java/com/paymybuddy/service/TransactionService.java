@@ -60,9 +60,13 @@ public class TransactionService implements ITransactionService {
             throw new IllegalArgumentException("Solde insuffisant");
         }
 
-        // Mise à jour des soldes
+        // Mise à jour des soldes destinateur
         source.setSolde(soldeSource.subtract(montantTransfert));
-        cible.setSolde((cible.getSolde() != null ? cible.getSolde() : BigDecimal.ZERO).add(montantTransfert));
+        //reduire frais de transfert
+        BigDecimal tauxFrais = new BigDecimal("0.95");
+        BigDecimal montantAvecFrais = montantTransfert.multiply(tauxFrais);
+        // Mise à jour des soldes recevoir
+        cible.setSolde((cible.getSolde() != null ? cible.getSolde() : BigDecimal.ZERO).add(montantAvecFrais));
 
         userRepository.save(source);
         userRepository.save(cible);

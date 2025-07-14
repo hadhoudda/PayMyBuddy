@@ -27,7 +27,7 @@
             <div class="col-sm-3">
                 <label for="email" class="form-label">Relation</label>
                 <select class="form-select" th:field="*{email}" id="email" required>
-                    <option disabled selected value="">Sélectionner une relation</option>
+                    <option value="">Sélectionner une relation</option>
                     <option th:each="email : ${contacts}"
                             th:value="${email}"
                             th:text="${email}">

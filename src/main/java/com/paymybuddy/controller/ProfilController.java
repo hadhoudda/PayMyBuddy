@@ -1,7 +1,10 @@
 package com.paymybuddy.controller;
 
+import com.paymybuddy.config.CustomUserDetails;
 import com.paymybuddy.dto.UserRegisterDto;
+import com.paymybuddy.model.Contact;
 import com.paymybuddy.model.User;
+import com.paymybuddy.service.ContactService;
 import com.paymybuddy.service.contracts.IUserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -24,24 +28,55 @@ public class ProfilController {
 
     private static final Logger logger = LogManager.getLogger(ProfilController.class);
     private final IUserService userService;
+    private final ContactService contactService;
 
-    public ProfilController(IUserService userService) {
+    public ProfilController(IUserService userService, ContactService contactService) {
         this.userService = userService;
+        this.contactService = contactService;
     }
 
+
+//    @GetMapping("/profil")
+//    public String showProfil(
+//            HttpServletResponse response,
+//            Model model,
+//            @AuthenticationPrincipal UserDetails userDetails) {
+//
+//        // empêcher le cache du navigateur
+//        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+//        response.setHeader("Pragma", "no-cache");
+//        response.setDateHeader("Expires", 0);
+//        // Vérifier si l'utilisateur est connecté
+//        if (userDetails == null) {
+//            return "redirect:/paymybuddy";
+//        }
+//
+//        String email = userDetails.getUsername();
+//        Optional<User> optionalUser = userService.findUserByEmail(email);
+//        logger.info("Profil demandé pour : {}", email);
+//
+//        //if (optionalUser.isPresent()) {
+//        if (optionalUser.isEmpty()) {
+//            return "redirect:/paymybuddy";
+//        }
+//        model.addAttribute("user", optionalUser.get());
+//        logger.info("Connexion de : " + userDetails.getUsername());
+//        return "profil";
+//    }
 
     @GetMapping("/profil")
     public String showProfil(
             HttpServletResponse response,
             Model model,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        // empêcher le cache du navigateur
+        // Empêcher le cache du navigateur
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         response.setHeader("Pragma", "no-cache");
         response.setDateHeader("Expires", 0);
+
         // Vérifier si l'utilisateur est connecté
-        if (userDetails == null) {
+        if (userDetails == null || userDetails.getUser() == null) {
             return "redirect:/paymybuddy";
         }
 
@@ -49,12 +84,18 @@ public class ProfilController {
         Optional<User> optionalUser = userService.findUserByEmail(email);
         logger.info("Profil demandé pour : {}", email);
 
-        //if (optionalUser.isPresent()) {
         if (optionalUser.isEmpty()) {
             return "redirect:/paymybuddy";
         }
-        model.addAttribute("user", optionalUser.get());
-        logger.info("Connexion de : " + userDetails.getUsername());
+
+        User user = optionalUser.get();
+        model.addAttribute("user", user);
+
+        // Charger et injecter les contacts pour la modale
+        List<Contact> contacts = contactService.getAllContacts(user.getUserId());
+        model.addAttribute("contacts", contacts);
+
+        logger.info("Connexion de : {}", email);
         return "profil";
     }
 

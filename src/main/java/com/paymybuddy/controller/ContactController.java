@@ -4,12 +4,14 @@ import com.paymybuddy.config.CustomUserDetails;
 import com.paymybuddy.dto.ContactDto;
 import com.paymybuddy.dto.UserRegisterDto;
 import com.paymybuddy.model.Contact;
+import com.paymybuddy.model.User;
 import com.paymybuddy.service.ContactService;
 import com.paymybuddy.service.UserService;
 import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,21 +35,6 @@ public class ContactController {
         this.contactService = contactService;
     }
 
-//    @GetMapping("/relation")
-//    public String relation(Model model) {
-//        List<String> contacts = contactService.getFriendEmails();
-//        logger.info("nbre de contacts : " + contacts.size());
-//
-//        if (!model.containsAttribute("contactDto")) {
-//            model.addAttribute("contactDto", new ContactDto());
-//        }
-//
-//        if (!model.containsAttribute("contacts")) {
-//            model.addAttribute("contacts", contacts);
-//        }
-//
-//        return "relation";
-//    }
 
     @GetMapping("/relation")
     public String relation(Model model) {
@@ -56,6 +43,22 @@ public class ContactController {
         }
         return "relation";
     }
+//@GetMapping("/relation")
+//public String relation(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
+//    if (!model.containsAttribute("contactDto")) {
+//        model.addAttribute("contactDto", new ContactDto());
+//    }
+//
+//    if (userDetails == null || userDetails.getUser() == null) {
+//        return "redirect:/login"; // sécurité si pas connecté
+//    }
+//
+//    Long userId = userDetails.getUser().getUserId();
+//    List<Contact> contacts = contactService.getAllContacts(userId);
+//    model.addAttribute("contacts", contacts);
+//
+//    return "relation";
+//}
 
     @PostMapping("/relation")
     public String addContact(
@@ -86,52 +89,16 @@ public class ContactController {
         return "redirect:/paymybuddy/relation";
     }
 
-//@GetMapping("/friends")
-//@ResponseBody
-//public List<String> getFriendEmails() {
-//    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//    if (authentication == null || !authentication.isAuthenticated()) {
-//        logger.error("Utilisateur non authentifié.");
-//        throw new SecurityException("Utilisateur non authentifié.");
-//    }
-//
-//    CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-//    Long userId = userDetails.getUser().getUserId();
-//    List<Contact> contacts = contactService.getAllContacts(userId);
-//
-//    // récuperes tous les donnees des amis
-//    // return contacts.stream()
-//    //                .map(ContactDto::new)
-//    //                .collect(Collectors.toList());
-//
-//    // Extraire uniquement les emails des amis
-//    return contacts.stream()
-//            .map(contact -> contact.getFriendIdUser().getEmail())
-//            .collect(Collectors.toList());
-//}
+    @PostMapping("/contact/delete")
+    public String deleteContact(@RequestParam String email,
+                                RedirectAttributes redirectAttributes) {
+        try {
+            contactService.deleteContact(email);
+            redirectAttributes.addFlashAttribute("successMessage", "Contact supprimé avec succès !");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/paymybuddy/profil";
+    }
 }
 
-//
-//    @GetMapping("/{id}")
-//    public ResponseEntity<List<User>> getFriends(@PathVariable long id) {
-//
-//        List<User> userList = contactService.getAllContacts(id);
-//        return ResponseEntity.ok(userList);
-////
-////        if (user.isEmpty()) {
-////            logger.info("User not found with ID: " + id);
-////            return ResponseEntity.notFound().build();
-////        }
-////
-////        //List<User> friends = contactService.getFriendsByUserId(id);
-////
-////        if (friends.isEmpty()) {
-////            logger.info("No friends found for user ID: " + id);
-////            return ResponseEntity.noContent().build();
-////        }
-////
-////        logger.info("Found " + friends.size() + " friends for user ID: " + id);
-////        return ResponseEntity.ok(friends);
-//    }
-//
-////
