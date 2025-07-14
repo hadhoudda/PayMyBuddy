@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
@@ -15,6 +17,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("SELECT o FROM Transaction o WHERE o.userSender.userId = :userId ORDER BY o.transactionDate DESC")
     Page<Transaction> listTransactions(@Param("userId") Long userId, Pageable pageable);
 
+    List<Transaction> findByUserSenderUserIdOrUserReceiverUserId(Long senderId, Long receiverId);
 
 //    //pour affiche les transation que je le recois avec description
 //    @Query("SELECT o FROM Transaction o WHERE o.userReciever.userId = :userId ORDER BY o.transactionDate DESC")

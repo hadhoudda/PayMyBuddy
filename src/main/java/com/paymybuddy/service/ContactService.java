@@ -15,8 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -67,6 +69,44 @@ public class ContactService implements IContactService {
         contact.setDateContact(LocalDateTime.now());
 
         return contactRepository.save(contact);
+    }
+
+
+    @Override
+    public List<Contact> getAllContacts(Long userId) {
+        // Récupération de l'utilisateur connecté via SecurityContext
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("Utilisateur non authentifié.");
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();  // Récupérer l'objet User complet
+        List<Contact> contacts = contactRepository.findByOwnerIdUser(user);
+        return contacts;
+    }
+
+
+    public List<String> getFriendEmails() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            logger.error("Utilisateur non authentifié.");
+            throw new SecurityException("Utilisateur non authentifié.");
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getUser().getUserId();
+        List<Contact> contacts = getAllContacts(userId);
+
+        // récuperes tous les donnees des amis
+        // return contacts.stream()
+        //                .map(ContactDto::new)
+        //                .collect(Collectors.toList());
+
+        // Extraire uniquement les emails des amis
+        return contacts.stream()
+                .map(contact -> contact.getFriendIdUser().getEmail())
+                .collect(Collectors.toList());
     }
 
 }

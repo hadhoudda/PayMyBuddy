@@ -19,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -163,6 +165,16 @@ public class UserService implements IUserService {
             logger.error("Conflit de version lors de la suppression de l'utilisateur ID {}", userId);
             throw new RuntimeException("Une autre opération a modifié votre compte. Suppression annulée.");
         }
+    }
+
+    @Override
+    public List<String> getContactsEmails(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable."));
+
+        return user.getOwnerContacts().stream()
+                .map(contact -> contact.getFriendIdUser().getEmail())  // accéder au User ami
+                .toList();
     }
 }
 

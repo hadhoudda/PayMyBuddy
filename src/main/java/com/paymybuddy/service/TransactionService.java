@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Transactional
@@ -41,7 +42,7 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public void transfertAmount(long idSource, long idCible, double montant) {
+    public void transfertAmount(long idSource, long idCible, String description,double montant) {
         if (montant <= 0) {
             throw new IllegalArgumentException("Le montant doit être supérieur à zéro.");
         }
@@ -75,7 +76,14 @@ public class TransactionService implements ITransactionService {
         transaction.setUserReceiver(cible);
         transaction.setTransactionAmount(montant);
         transaction.setTransactionDate(LocalDateTime.now());
-        transaction.setTransactionDescription("Transfert de " + montant + " de " + source.getUserName() + " à " + cible.getUserName());
+        transaction.setTransactionDescription(description);
+        //System.out.println(transaction.getTransactionDescription());
+//        transaction.setTransactionDescription("Transfert de " + montant + " de " + source.getUserName() + " à " + cible.getUserName());
         transactionRepository.save(transaction);
+    }
+
+    @Override
+    public List<Transaction> getTransactionsForUser(Long userId) {
+        return transactionRepository.findByUserSenderUserIdOrUserReceiverUserId(userId, userId);
     }
 }

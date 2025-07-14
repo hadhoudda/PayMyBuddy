@@ -11,6 +11,7 @@ public interface IUserService {
     User createUser(UserRegisterDto userDto);
     //User save(User user);
     Optional<User> findUserByEmail(String email);
+    List<String> getContactsEmails(Long userId);
     //List<User> getAllUsers();
     //Optional<User> findUserById(long id);
 

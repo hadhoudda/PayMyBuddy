@@ -68,6 +68,7 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                         .permitAll()
                 )
+                .httpBasic(Customizer.withDefaults())//desactive en production
 
                 .build();
     }

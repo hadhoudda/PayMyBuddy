@@ -2,6 +2,7 @@ package com.paymybuddy.model;//package com.paymybuddy.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,10 +35,15 @@ public class User implements Serializable {
 
     @Column(name = "user_name")
     @NotNull(message = "userName can not be null")
+    @Size(min = 6, max = 20, message = "Le userName doit faire entre 6 et 20 caractères")
     private String userName;
 
+    @Size(min = 10, max = 50, message = "Le mail doit faire entre 10 et 50 caractères")
+    @NotNull(message = "email can not be null")
     private String email;
 
+    @Size(min = 6, max = 12, message = "Le mot de passe doit faire entre 6 et 12 caractères")
+    @NotNull(message = "password can not be null")
     private String password;
 
     private BigDecimal solde = BigDecimal.ZERO;
