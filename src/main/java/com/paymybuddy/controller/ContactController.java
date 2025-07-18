@@ -43,22 +43,6 @@ public class ContactController {
         }
         return "relation";
     }
-//@GetMapping("/relation")
-//public String relation(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
-//    if (!model.containsAttribute("contactDto")) {
-//        model.addAttribute("contactDto", new ContactDto());
-//    }
-//
-//    if (userDetails == null || userDetails.getUser() == null) {
-//        return "redirect:/login"; // sécurité si pas connecté
-//    }
-//
-//    Long userId = userDetails.getUser().getUserId();
-//    List<Contact> contacts = contactService.getAllContacts(userId);
-//    model.addAttribute("contacts", contacts);
-//
-//    return "relation";
-//}
 
     @PostMapping("/relation")
     public String addContact(

@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Controller
@@ -30,7 +32,7 @@ public class TransactionController {
     private static final Logger logger = (Logger) LogManager.getLogger(TransactionController.class);
     private final ContactService contactService;
     private final ITransactionService transactionService;
-    private  final UserService userService;
+    private final UserService userService;
 
     @Autowired
     UserRepository userRepository;
@@ -42,26 +44,25 @@ public class TransactionController {
         this.userService = userService;
     }
 
-@GetMapping("/transfert")
-public String showTransfertForm(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
-    User currentUser = userDetails.getUser();
+    @GetMapping("/transfert")
+    public String showTransfertForm(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        User currentUser = userDetails.getUser();
 
-    model.addAttribute("transactionDto", new TransactionDto());
-    model.addAttribute("contacts", userService.getContactsEmails(currentUser.getUserId()));
+        model.addAttribute("transactionDto", new TransactionDto());
+        model.addAttribute("contacts", userService.getContactsEmails(currentUser.getUserId()));
 
-    List<Transaction> transactions = transactionService.getTransactionsForUser(currentUser.getUserId());
-    model.addAttribute("transactions", transactions);
+        List<Transaction> transactions = transactionService.getTransactionsForUser(currentUser.getUserId());
+        model.addAttribute("transactions", transactions);
 
-    return "transfert";
-}
+        return "transfert";
+    }
 
-    //transfert d'argent
     @PostMapping("/transfert")
     public String TransfertSolde(
             @ModelAttribute("transactionDto") @Valid TransactionDto transactionDto,
             BindingResult result,
             RedirectAttributes redirectAttributes,
-            @AuthenticationPrincipal CustomUserDetails userDetails,  // récupération directe de l'utilisateur connecté
+            @AuthenticationPrincipal CustomUserDetails userDetails,  // utilisateur connecté
             Model model) {
 
         if (result.hasErrors()) {
@@ -71,7 +72,7 @@ public String showTransfertForm(Model model, @AuthenticationPrincipal CustomUser
         // Récupérer l'utilisateur connecté
         User sourceUser = userDetails.getUser();
 
-        // Récupérer le destinataire si existe
+        // Récupérer le destinataire
         User cibleUser = userRepository.findByEmail(transactionDto.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé avec cet email"));
 
@@ -81,13 +82,27 @@ public String showTransfertForm(Model model, @AuthenticationPrincipal CustomUser
         }
 
         try {
+            double montant = transactionDto.getTransactionAmount();
+
+            // Calcul des frais (0.5%)
+            BigDecimal montantTransfert = BigDecimal.valueOf(montant);
+            BigDecimal tauxFrais = new BigDecimal("0.005");
+            BigDecimal frais = montantTransfert.multiply(tauxFrais).setScale(2, RoundingMode.HALF_UP);
+
+            // Effectuer le transfert
             transactionService.transfertAmount(
                     sourceUser.getUserId(),
                     cibleUser.getUserId(),
                     transactionDto.getTransactionDescription(),
-                    transactionDto.getTransactionAmount());
+                    montant);
 
-            redirectAttributes.addFlashAttribute("successMessage", "Transfert effectué avec succès.");
+            // Message de confirmation avec montant + frais
+            String message = String.format(
+                    "Transfert de %.2f € effectué avec succès. Frais de transfert : %.2f €.",
+                    montantTransfert, frais);
+
+            redirectAttributes.addFlashAttribute("successMessage", message);
+
             return "redirect:/paymybuddy/transfert";
 
         } catch (IllegalArgumentException | jakarta.persistence.EntityNotFoundException e) {
@@ -95,25 +110,5 @@ public String showTransfertForm(Model model, @AuthenticationPrincipal CustomUser
             return "transfert";
         }
     }
-
-        /**
-         * Endpoint pour afficher les transactions d’un utilisateur
-         * Exemple d’appel : GET /api/transactions/user/1?page=0&size=10
-         */
-//    @GetMapping("/transactions/{userId}")
-//    public Page<Transaction> getUserTransactions(
-//            @PathVariable("userId") long userId,
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "10") int size
-//    ) {
-//        return transactionService.displayTransaction(userId, page, size);
-//    }
-
-        //transfert d'argent
-//    @PutMapping("/transactions/{idUser}/{idCible}/{montant}")
-//    public ResponseEntity<String> transfertSolde(@PathVariable long idUser, @PathVariable long idCible, @PathVariable double montant){
-//        transactionService.transfertAmount(idUser,idCible, montant);
-//        return ResponseEntity.ok("solde transferet");
-//    }
 
 }

@@ -9,8 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class AppController {
 
-
-
     @RequestMapping("/paymybuddy")
     public String index() {
         return "index";

@@ -98,11 +98,6 @@ public class ContactService implements IContactService {
         Long userId = userDetails.getUser().getUserId();
         List<Contact> contacts = getAllContacts(userId);
 
-        // récuperes tous les donnees des amis
-        // return contacts.stream()
-        //                .map(ContactDto::new)
-        //                .collect(Collectors.toList());
-
         // Extraire uniquement les emails des amis
         return contacts.stream()
                 .map(contact -> contact.getFriendIdUser().getEmail())

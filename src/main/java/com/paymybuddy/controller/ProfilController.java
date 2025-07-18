@@ -1,24 +1,19 @@
 package com.paymybuddy.controller;
 
 import com.paymybuddy.config.CustomUserDetails;
-import com.paymybuddy.dto.UserRegisterDto;
 import com.paymybuddy.model.Contact;
 import com.paymybuddy.model.User;
 import com.paymybuddy.service.ContactService;
 import com.paymybuddy.service.contracts.IUserService;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,35 +29,6 @@ public class ProfilController {
         this.userService = userService;
         this.contactService = contactService;
     }
-
-
-//    @GetMapping("/profil")
-//    public String showProfil(
-//            HttpServletResponse response,
-//            Model model,
-//            @AuthenticationPrincipal UserDetails userDetails) {
-//
-//        // empêcher le cache du navigateur
-//        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-//        response.setHeader("Pragma", "no-cache");
-//        response.setDateHeader("Expires", 0);
-//        // Vérifier si l'utilisateur est connecté
-//        if (userDetails == null) {
-//            return "redirect:/paymybuddy";
-//        }
-//
-//        String email = userDetails.getUsername();
-//        Optional<User> optionalUser = userService.findUserByEmail(email);
-//        logger.info("Profil demandé pour : {}", email);
-//
-//        //if (optionalUser.isPresent()) {
-//        if (optionalUser.isEmpty()) {
-//            return "redirect:/paymybuddy";
-//        }
-//        model.addAttribute("user", optionalUser.get());
-//        logger.info("Connexion de : " + userDetails.getUsername());
-//        return "profil";
-//    }
 
     @GetMapping("/profil")
     public String showProfil(

@@ -57,6 +57,12 @@
                 <button type="submit" class="btn btn-primary">Payer</button>
             </div>
         </form>
+
+        <!-- Message de confirmation -->
+        <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
+
+        <!-- Message d'erreur globale (si besoin) -->
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
     </section>
 
     <section class="py-5 my-5">

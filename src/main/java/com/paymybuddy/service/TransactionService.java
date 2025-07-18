@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -42,7 +43,7 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public void transfertAmount(long idSource, long idCible, String description,double montant) {
+    public void transfertAmount(long idSource, long idCible, String description, double montant) {
         if (montant <= 0) {
             throw new IllegalArgumentException("Le montant doit être supérieur à zéro.");
         }
@@ -56,35 +57,45 @@ public class TransactionService implements ITransactionService {
         BigDecimal montantTransfert = BigDecimal.valueOf(montant);
         BigDecimal soldeSource = source.getSolde() != null ? source.getSolde() : BigDecimal.ZERO;
 
-        if (soldeSource.compareTo(montantTransfert) < 0) {
-            throw new IllegalArgumentException("Solde insuffisant");
+        // calcul du frais (0.5%)
+        BigDecimal tauxFrais = new BigDecimal("0.005");
+        BigDecimal frais = montantTransfert.multiply(tauxFrais).setScale(2, RoundingMode.HALF_UP);
+
+        // mMontant total à débiter du compte source
+        BigDecimal totalDebite = montantTransfert.add(frais);
+
+        // Vérifie le solde
+        if (soldeSource.compareTo(totalDebite) < 0) {
+            throw new IllegalArgumentException("Solde insuffisant pour couvrir le montant et les frais.");
         }
 
-        // Mise à jour des soldes destinateur
-        source.setSolde(soldeSource.subtract(montantTransfert));
-        //reduire frais de transfert
-        BigDecimal tauxFrais = new BigDecimal("0.95");
-        BigDecimal montantAvecFrais = montantTransfert.multiply(tauxFrais);
-        // Mise à jour des soldes recevoir
-        cible.setSolde((cible.getSolde() != null ? cible.getSolde() : BigDecimal.ZERO).add(montantAvecFrais));
+        // mise à jour des soldes
+        source.setSolde(soldeSource.subtract(totalDebite));
+        BigDecimal soldeCible = cible.getSolde() != null ? cible.getSolde() : BigDecimal.ZERO;
+        cible.setSolde(soldeCible.add(montantTransfert));
 
         userRepository.save(source);
         userRepository.save(cible);
+
+        // 🔍 Log pour vérification
         System.out.println("////////////////////////////");
-        System.out.println(source);
-        System.out.println(cible);
+        System.out.println("Source : " + source);
+        System.out.println("Cible : " + cible);
+        System.out.println("Montant transféré : " + montantTransfert);
+        System.out.println("Frais appliqué : " + frais);
+        System.out.println("Montant débité : " + totalDebite);
         System.out.println("////////////////////////////");
-        // Enregistrement de la transaction
+
+        // ✅ Enregistrement de la transaction
         Transaction transaction = new Transaction();
         transaction.setUserSender(source);
         transaction.setUserReceiver(cible);
-        transaction.setTransactionAmount(montant);
+        transaction.setTransactionAmount(montant); // ce que le destinataire reçoit
         transaction.setTransactionDate(LocalDateTime.now());
         transaction.setTransactionDescription(description);
-        //System.out.println(transaction.getTransactionDescription());
-//        transaction.setTransactionDescription("Transfert de " + montant + " de " + source.getUserName() + " à " + cible.getUserName());
         transactionRepository.save(transaction);
     }
+
 
     @Override
     public List<Transaction> getTransactionsForUser(Long userId) {

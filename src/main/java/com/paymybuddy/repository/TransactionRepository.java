@@ -19,9 +19,4 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     List<Transaction> findByUserSenderUserIdOrUserReceiverUserId(Long senderId, Long receiverId);
 
-//    //pour affiche les transation que je le recois avec description
-//    @Query("SELECT o FROM Transaction o WHERE o.userReciever.userId = :userId ORDER BY o.transactionDate DESC")
-//    Page<Transaction> listTransactionsReciever(@Param("userId") Long userId, Pageable pageable);
-
-
 }

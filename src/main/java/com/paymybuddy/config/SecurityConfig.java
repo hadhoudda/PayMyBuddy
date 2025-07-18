@@ -9,10 +9,10 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 
 @Configuration
@@ -39,6 +39,7 @@ public class SecurityConfig {
 
                 // Configuration des accès
                 .authorizeHttpRequests(auth -> auth
+                        // Chemins publics accessibles sans être connecté
                         .requestMatchers(
                                 "/paymybuddy",
                                 "/paymybuddy/login",
@@ -48,25 +49,28 @@ public class SecurityConfig {
                                 "/js/**",
                                 "/images/**"
                         ).permitAll()
+                        // Toutes les autres requêtes nécessitent une authentification
                         .anyRequest().authenticated()
                 )
 
                 // Configuration du formulaire de login
                 .formLogin(form -> form
-                        .loginPage("/paymybuddy/login")
-                        .loginProcessingUrl("/login") // correspond à action du <form>
-                        .defaultSuccessUrl("/paymybuddy/profil", true)
-                        .failureUrl("/paymybuddy/login?error=true")
+                        .loginPage("/paymybuddy/login")            // Page personnalisée
+                        .loginProcessingUrl("/login")              // Action du formulaire
+                        //.usernameParameter("email")                // Champ du formulaire HTML
+                        //.passwordParameter("password")
+                        .defaultSuccessUrl("/paymybuddy/profil", true) // Redirection après succès
+                        .failureUrl("/paymybuddy/login?error=true")    // Redirection en cas d'erreur
                         .permitAll()
                 )
 
-                // Configuration du logout
+                // Configuration du logout la déconnexion
                 .logout(logout -> logout
-                        .logoutUrl("/logout") // utilisé par le formulaire de logout
-                        .logoutSuccessUrl("/paymybuddy/login?logout=true")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                        .permitAll()
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout")) // Point de sortie (URL de logout)
+                        .logoutSuccessUrl("/paymybuddy/login?logout=true")          // Redirection après déconnexion
+                        .invalidateHttpSession(true)                                // Détruit la session HTTP
+                        .deleteCookies("JSESSIONID")              // Supprime le cookie de session
+                        .permitAll()                                                // Accessible sans être connecté
                 )
                 .httpBasic(Customizer.withDefaults())//desactive en production
 

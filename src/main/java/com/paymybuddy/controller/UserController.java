@@ -7,7 +7,6 @@ import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -93,75 +92,3 @@ public class UserController {
     }
 
 }
-
-//
-//    @GetMapping("/users")
-//    public ResponseEntity<List<User>> getUsers() {
-//        List<User> userList = userService.getAllUsers();
-//        if (userList.isEmpty()){
-//            logger.info("User not found");
-//            return ResponseEntity.noContent().build();
-//        }else {
-//            logger.info("Users successfully retrieved: " + userList.size() + " users");
-//            return ResponseEntity.ok(userList);
-//        }
-//    }
-//
-//
-//
-
-//
-//
-//
-//
-////
-////    @GetMapping("/utilisateur/{id}")
-////    public ResponseEntity<User>  getUserById(@PathVariable int id){
-////        User user = userService.findUserById(id);
-////        if(user==null){
-////            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
-////        }
-////        return new ResponseEntity<>(user, HttpStatus.OK);
-////    }
-//
-//
-//
-//    @PutMapping
-//    public ResponseEntity<User> updateUser(@RequestBody User user) {
-//        try {
-//            User updatedUser = userService.updateUser(user);
-//            return ResponseEntity.ok(updatedUser);
-//        } catch (IllegalArgumentException e) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-//        }
-//    }
-//
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<String> deleteUser(@PathVariable long id) {
-//        try {
-//            userService.deleteUser(id);
-//            return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully");
-//        } catch (IllegalArgumentException e) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found: " + e.getMessage());
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete user");
-//        }
-//    }
-//
-////    @GetMapping("/utilisateur/relation/{email}")
-////    public ResponseEntity<List<User>> getUserByEmail(@PathVariable String email) {
-////        try {
-////            List<User> userList = userService.findByEmail(email);
-////            if (userList.isEmpty()) {
-////                return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
-////            } else {
-////                return new ResponseEntity<>(userList, HttpStatus.OK);
-////            }
-////
-////        } catch (Exception e) {
-////            return ResponseEntity.noContent().build();
-////        }
-////    }
-
-
-

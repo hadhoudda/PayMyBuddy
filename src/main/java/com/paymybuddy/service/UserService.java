@@ -22,7 +22,6 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -102,11 +101,7 @@ public class UserService implements IUserService {
             BigDecimal montantAjoute = BigDecimal.valueOf(montant);
             BigDecimal soldeActuel = user.getSolde() != null ? user.getSolde() : BigDecimal.ZERO;
 
-            // Multiplier par 0.95
-            BigDecimal tauxFrais = new BigDecimal("0.95");
-            BigDecimal montantAvecFrais = montantAjoute.multiply(tauxFrais);
-            //ajoute au solde apres reduction de 5%
-            BigDecimal nouveauSolde = soldeActuel.add(montantAvecFrais);
+            BigDecimal nouveauSolde = soldeActuel.add(montantAjoute);
 
             // Arrondi à 2 décimales
             nouveauSolde = nouveauSolde.setScale(2, RoundingMode.HALF_UP);

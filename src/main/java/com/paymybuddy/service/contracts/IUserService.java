@@ -9,18 +9,10 @@ import java.util.Optional;
 public interface IUserService {
 
     User createUser(UserRegisterDto userDto);
-    //User save(User user);
     Optional<User> findUserByEmail(String email);
     List<String> getContactsEmails(Long userId);
-    //List<User> getAllUsers();
-    //Optional<User> findUserById(long id);
-
-    //User updateUser(User user);
-    //Optional<User> findByEmail(String email);
     void verseSolde(double montant);
     void updateUserName(String userName);
     void deleteUser();
-    //void transfertAmount(long idSource, long idCible, double montant);
-
 }
 
