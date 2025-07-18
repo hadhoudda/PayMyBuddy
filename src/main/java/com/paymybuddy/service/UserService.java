@@ -1,6 +1,5 @@
 package com.paymybuddy.service;
 
-
 import com.paymybuddy.config.CustomUserDetails;
 import com.paymybuddy.dto.UserRegisterDto;
 import com.paymybuddy.mapper.UserRegisterMapper;
@@ -23,6 +22,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service métier pour la gestion des utilisateurs.
+ */
 @Service
 @Transactional
 public class UserService implements IUserService {
@@ -31,66 +33,83 @@ public class UserService implements IUserService {
 
     @Autowired
     private UserRepository userRepository;
-    private final UserRegisterMapper userRegisterMapper;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, UserRegisterMapper userRegisterMapper) {
+    private final UserRegisterMapper userRegisterMapper;
+
+    public UserService(UserRepository userRepository, UserRegisterMapper userRegisterMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userRegisterMapper = userRegisterMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
-
-    //ajouter nouvel utilisateur
+    /**
+     * Crée un nouvel utilisateur à partir des données d'inscription.
+     *
+     * @param userRegisterDto DTO contenant les informations de l'utilisateur
+     * @return l'utilisateur créé et persisté
+     */
     @Override
     public User createUser(UserRegisterDto userRegisterDto) {
+        logger.info("Création d’un utilisateur : username='{}', email='{}'",
+                userRegisterDto.getUserName(), userRegisterDto.getEmail());
+
         Optional<User> existingUser = userRepository.findByEmail(userRegisterDto.getEmail());
-        logger.info("Création user, userName = '{}', email = '{}'", userRegisterDto.getUserName(), userRegisterDto.getEmail());
         if (existingUser.isPresent()) {
-            logger.error("Impossible de créer, un utilisateur avec cet email existe déjà");
+            logger.error("Échec création : email déjà existant.");
             throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà");
         }
 
-        // Validation avant la conversion
         if (userRegisterDto.getUserName() == null || userRegisterDto.getUserName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Le nom  est obligatoire");
+            throw new IllegalArgumentException("Le nom est obligatoire");
         }
         if (userRegisterDto.getEmail() == null || userRegisterDto.getEmail().trim().isEmpty()) {
-            throw new IllegalArgumentException("Le mail est obligatoire");
+            throw new IllegalArgumentException("L'email est obligatoire");
         }
         if (userRegisterDto.getPassword() == null || userRegisterDto.getPassword().trim().isEmpty()) {
             throw new IllegalArgumentException("Le mot de passe est obligatoire");
         }
 
-        // Crypter le mot de passe
         String encodedPassword = passwordEncoder.encode(userRegisterDto.getPassword());
         userRegisterDto.setPassword(encodedPassword);
-        // on convertit en entité (avec le mot de passe hashé)
+
         User user = userRegisterMapper.toEntity(userRegisterDto);
-        logger.info("Utilisateur ajouté avec succès : {}", user.getEmail());
-        user.setDateCreate(LocalDateTime.now());//enregistre date de creation
+        user.setDateCreate(LocalDateTime.now());
+
+        logger.info("Utilisateur enregistré avec succès : {}", user.getEmail());
         return userRepository.save(user);
     }
 
+    /**
+     * Recherche un utilisateur par son email.
+     *
+     * @param email l'email à rechercher
+     * @return un Optional contenant l'utilisateur s'il existe
+     */
     @Override
     public Optional<User> findUserByEmail(String email) {
-        Optional<User> userOptional= userRepository.findByEmail(email);
-        return userOptional;
+        return userRepository.findByEmail(email);
     }
 
-    // ajouter solde
+    /**
+     * Ajoute un montant au solde de l'utilisateur connecté.
+     *
+     * @param montant le montant à ajouter
+     */
     @Override
     public void verseSolde(double montant) {
         if (montant <= 0) {
             throw new IllegalArgumentException("Le montant doit être supérieur à zéro.");
         }
 
-        // Récupération de l'utilisateur connecté via SecurityContext
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
-            logger.error("Utilisateur non authentifié.");
+            logger.error("Ajout de solde échoué : utilisateur non authentifié.");
             throw new SecurityException("Utilisateur non authentifié.");
         }
+
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUser().getUserId();
 
@@ -100,31 +119,31 @@ public class UserService implements IUserService {
 
             BigDecimal montantAjoute = BigDecimal.valueOf(montant);
             BigDecimal soldeActuel = user.getSolde() != null ? user.getSolde() : BigDecimal.ZERO;
-
-            BigDecimal nouveauSolde = soldeActuel.add(montantAjoute);
-
-            // Arrondi à 2 décimales
-            nouveauSolde = nouveauSolde.setScale(2, RoundingMode.HALF_UP);
+            BigDecimal nouveauSolde = soldeActuel.add(montantAjoute).setScale(2, RoundingMode.HALF_UP);
 
             user.setSolde(nouveauSolde);
             userRepository.save(user);
-            logger.info("Solde mis à jour avec succès pour l'utilisateur ID {}", userId);
 
+            logger.info("Solde mis à jour avec succès pour utilisateur ID={}", userId);
         } catch (org.springframework.orm.ObjectOptimisticLockingFailureException e) {
-            logger.error("Conflit de mise à jour concurrente pour l'utilisateur ID {}", userId);
+            logger.error("Conflit de mise à jour concurrente : utilisateur ID={}", userId);
             throw new RuntimeException("Votre solde a été modifié par une autre opération. Veuillez réessayer.");
         }
     }
 
-    //modifier username
+    /**
+     * Met à jour le nom d'utilisateur de l'utilisateur connecté.
+     *
+     * @param userName le nouveau nom d'utilisateur
+     */
     @Override
     public void updateUserName(String userName) {
-        // Récupération de l'utilisateur connecté via SecurityContext
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
-            logger.error("Utilisateur non authentifié.");
+            logger.error("Modification username échouée : utilisateur non authentifié.");
             throw new SecurityException("Utilisateur non authentifié.");
         }
+
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUser().getUserId();
 
@@ -132,24 +151,24 @@ public class UserService implements IUserService {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable"));
 
-            // Mise à jour userName
             user.setUserName(userName);
             userRepository.save(user);
 
-            logger.info("Username modifié avec succès pour l'utilisateur ID {}", userId);
+            logger.info("Nom d'utilisateur mis à jour pour utilisateur ID={}", userId);
         } catch (org.springframework.orm.ObjectOptimisticLockingFailureException e) {
-            logger.error("Conflit de mise à jour concurrente sur le user ID {}", userId);
+            logger.error("Conflit de mise à jour concurrente pour utilisateur ID={}", userId);
             throw new RuntimeException("Une autre opération a modifié votre compte. Veuillez réessayer.");
         }
     }
 
+    /**
+     * Supprime l'utilisateur connecté de la base de données.
+     */
     @Override
-    @Transactional
     public void deleteUser() {
-        // Récupération de l'utilisateur connecté via SecurityContext
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
-            logger.info("Utilisateur non authentifié.");
+            logger.info("Suppression utilisateur échouée : utilisateur non authentifié.");
             throw new SecurityException("Utilisateur non authentifié.");
         }
 
@@ -157,29 +176,31 @@ public class UserService implements IUserService {
         Long userId = userDetails.getUser().getUserId();
 
         try {
-            // Recharge l'utilisateur dans la même transaction
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable."));
 
-            // Suppression — le champ @Version sera vérifié
             userRepository.delete(user);
 
-            logger.info("Utilisateur supprimé avec succès (ID {}).", userId);
+            logger.info("Utilisateur supprimé avec succès : ID={}", userId);
         } catch (org.springframework.orm.ObjectOptimisticLockingFailureException e) {
-            logger.error("Conflit de version lors de la suppression de l'utilisateur ID {}", userId);
+            logger.error("Conflit de suppression (version) : utilisateur ID={}", userId);
             throw new RuntimeException("Une autre opération a modifié votre compte. Suppression annulée.");
         }
     }
 
+    /**
+     * Récupère la liste des adresses email des contacts d'un utilisateur.
+     *
+     * @param userId ID de l'utilisateur
+     * @return liste des emails de ses amis/contacts
+     */
     @Override
     public List<String> getContactsEmails(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable."));
 
         return user.getOwnerContacts().stream()
-                .map(contact -> contact.getFriendIdUser().getEmail())  // accéder au User ami
+                .map(contact -> contact.getFriendIdUser().getEmail())
                 .toList();
     }
 }
-
-
