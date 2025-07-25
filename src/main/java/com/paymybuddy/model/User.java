@@ -1,4 +1,4 @@
-package com.paymybuddy.model;//package com.paymybuddy.model;
+package com.paymybuddy.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -28,10 +28,6 @@ public class User implements Serializable {
     @Column(name = "id_user")
     private Long userId;
 
-    @Version
-    @Column(name = "version", nullable = false)
-    private Integer version;
-
     @Column(name = "user_name")
     @NotNull(message = "userName can not be null")
     private String userName;
@@ -46,9 +42,6 @@ public class User implements Serializable {
 
     @Column(name = "date_create")
     private LocalDateTime dateCreate;
-
-    @Column(name = "enabled")
-    private boolean enabled = true; //true: compte actif car pas de confirmation par mail
 
     // Transactions
     @OneToMany(mappedBy = "userSender", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

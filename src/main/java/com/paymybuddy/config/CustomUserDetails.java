@@ -48,8 +48,8 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-       // return true; // Tous les comptes sont activés
-        return user.isEnabled();
+        return true; // Tous les comptes sont activés
+
     }
 
 

@@ -1,18 +1,10 @@
 package com.paymybuddy.controller;
 
-import com.paymybuddy.config.CustomUserDetails;
 import com.paymybuddy.dto.ContactDto;
-import com.paymybuddy.dto.UserRegisterDto;
-import com.paymybuddy.model.Contact;
-import com.paymybuddy.model.User;
 import com.paymybuddy.service.ContactService;
-import com.paymybuddy.service.UserService;
 import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,9 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/paymybuddy")

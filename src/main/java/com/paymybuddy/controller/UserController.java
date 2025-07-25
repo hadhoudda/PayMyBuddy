@@ -9,14 +9,12 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
-
 
 @Controller
 @RequestMapping("/paymybuddy")
@@ -28,20 +26,26 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
-    public UserController(IUserService userService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+    public UserController(IUserService userService,
+                          PasswordEncoder passwordEncoder,
+                          AuthenticationManager authenticationManager) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
     }
 
-    //affiche page web form login
+    /**
+     * Affiche la page de connexion.
+     */
     @GetMapping("/login")
     public String showLoginForm(Model model) {
         model.addAttribute("userLoginDto", new UserLoginDto());
         return "login";
     }
 
-    //affiche page web form inscription
+    /**
+     * Affiche le formulaire d'inscription.
+     */
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
         if (!model.containsAttribute("userRegisterDto")) {
@@ -50,45 +54,49 @@ public class UserController {
         return "register";
     }
 
-    //affiche page web confirmation d'inscription
+    /**
+     * Affiche la page de confirmation d'inscription.
+     */
     @GetMapping("/register/confirmed")
     public String showConfirmationRegister() {
         return "confirmationRegister";
     }
 
-    //creer un nouveau utilisateur
+    /**
+     * Traite l'inscription d'un nouvel utilisateur.
+     */
     @PostMapping("/register")
     public String registerUser(
             @ModelAttribute("userRegisterDto") @Valid UserRegisterDto userRegisterDto,
             BindingResult result,
             RedirectAttributes redirectAttributes) {
-            //confirmation que les mots de passe identique
+
+        logger.info("Tentative d'inscription pour l'email: {}", userRegisterDto.getEmail());
+
+        // Vérifie si les mots de passe sont identiques
         if (!userRegisterDto.getPassword().equals(userRegisterDto.getConfirmPassword())) {
             result.rejectValue("confirmPassword", "error.user", "Les mots de passe ne correspondent pas.");
         }
 
-
+        // Si erreurs de validation, on renvoie vers le formulaire
         if (result.hasErrors()) {
-            // On stocke les erreurs et l'objet UserRegisterDto dans les flash attributes
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.userRegisterDto", result);
             redirectAttributes.addFlashAttribute("userRegisterDto", userRegisterDto);
-            // Redirection vers le formulaire en GET
             return "redirect:/paymybuddy/register";
         }
 
-        userRegisterDto.setDateCreate(LocalDateTime.now());// ajouter la date de création
+        userRegisterDto.setDateCreate(LocalDateTime.now());
 
         try {
             userService.createUser(userRegisterDto);
+            logger.info("Inscription réussie pour l'email: {}", userRegisterDto.getEmail());
         } catch (IllegalArgumentException e) {
-            // Gestion des erreurs métiers (ex: email déjà utilisé)
+            logger.warn("Erreur lors de l'inscription: {}", e.getMessage());
             redirectAttributes.addFlashAttribute("userRegisterDto", userRegisterDto);
             redirectAttributes.addFlashAttribute("emailError", e.getMessage());
-            // Redirection vers le formulaire en GET
             return "redirect:/paymybuddy/register";
         }
 
         return "redirect:/paymybuddy/register/confirmed";
     }
-
 }

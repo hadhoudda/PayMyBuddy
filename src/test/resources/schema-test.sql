@@ -1,0 +1,66 @@
+-- -----------------------------------------------------
+-- Schema paymybuddy_test_db
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `paymybuddy_test_db` DEFAULT CHARACTER SET utf8mb4;
+
+-- -----------------------------------------------------
+-- Table `users`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `users` (
+  `id_user` BIGINT NOT NULL AUTO_INCREMENT,
+  `user_name` VARCHAR(50) NOT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `password` VARCHAR(255) NOT NULL,
+  `solde` DECIMAL(10,2) DEFAULT 0.00,
+  `date_create` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_user`),
+  UNIQUE KEY `email_UNIQUE` (`email`)
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------
+-- Table `contacts`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `contacts` (
+  `id_contact` BIGINT NOT NULL AUTO_INCREMENT,
+  `date_contact` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `user_id_owner` BIGINT NOT NULL,
+  `user_id_friend` BIGINT NOT NULL,
+  PRIMARY KEY (`id_contact`),
+  INDEX `fk_contacts_owner_idx` (`user_id_owner`),
+  INDEX `fk_contacts_friend_idx` (`user_id_friend`),
+  CONSTRAINT `fk_contacts_owner`
+    FOREIGN KEY (`user_id_owner`) REFERENCES `users` (`id_user`)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_contacts_friend`
+    FOREIGN KEY (`user_id_friend`) REFERENCES `users` (`id_user`)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------
+-- Table `transactions`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `transactions` (
+  `id_transaction` BIGINT NOT NULL AUTO_INCREMENT,
+  `description` VARCHAR(255) NOT NULL,
+  `amount` DOUBLE NOT NULL,
+  `date_transaction` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `user_id_sender` BIGINT NOT NULL,
+  `user_id_receiver` BIGINT NOT NULL,
+  PRIMARY KEY (`id_transaction`),
+  INDEX `fk_transactions_sender_idx` (`user_id_sender`),
+  INDEX `fk_transactions_receiver_idx` (`user_id_receiver`),
+  CONSTRAINT `fk_transactions_sender`
+    FOREIGN KEY (`user_id_sender`) REFERENCES `users` (`id_user`)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_transactions_receiver`
+    FOREIGN KEY (`user_id_receiver`) REFERENCES `users` (`id_user`)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------
+-- Insert sample users
+-- -----------------------------------------------------
+--DELETE FROM users;
+--INSERT INTO users (user_name, email, password, solde, date_create) VALUES
+--('user1', 'user1@yahoo.fr', 'user_1', 0.00, CURRENT_TIMESTAMP),
+--('user2', 'user2@yahoo.fr', 'user_2', 0.00, CURRENT_TIMESTAMP);

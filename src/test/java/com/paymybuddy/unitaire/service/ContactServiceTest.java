@@ -9,9 +9,13 @@ import com.paymybuddy.service.ContactService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -19,21 +23,23 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@SpringBootTest
+@Transactional
 class ContactServiceTest {
 
-    @Mock
+    @MockitoBean
     private ContactRepository contactRepository;
 
-    @Mock
+    @MockitoBean
     private UserRepository userRepository;
 
-    @InjectMocks
+    @Autowired
     private ContactService contactService;
 
-    @Mock
+    @MockitoBean
     private Authentication authentication;
 
-    @Mock
+    @MockitoBean
     private SecurityContext securityContext;
 
     private User currentUser;
@@ -57,8 +63,6 @@ class ContactServiceTest {
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getPrincipal()).thenReturn(customUserDetails);
     }
-
-    // ======= addNewContact =======
 
     @Test
     void addNewContact_shouldAddContact() {
@@ -132,8 +136,6 @@ class ContactServiceTest {
         assertTrue(ex.getMessage().contains("existe déjà"));
     }
 
-    // ======= getAllContacts =======
-
     @Test
     void getAllContacts_shouldReturnList() {
         Contact c1 = new Contact();
@@ -146,8 +148,6 @@ class ContactServiceTest {
         assertEquals(2, result.size());
         verify(contactRepository).findByOwnerIdUser(currentUser);
     }
-
-    // ======= getFriendEmails =======
 
     @Test
     void getFriendEmails_shouldReturnEmails() {
@@ -171,8 +171,6 @@ class ContactServiceTest {
         assertTrue(emails.contains("friend1@example.com"));
         assertTrue(emails.contains("friend2@example.com"));
     }
-
-    // ======= deleteContact =======
 
     @Test
     void deleteContact_shouldDeleteContact() {
@@ -224,8 +222,6 @@ class ContactServiceTest {
 
         assertTrue(ex.getMessage().contains("n'existe pas"));
     }
-
-    // ======= Authentication failures =======
 
     @Test
     void allMethods_shouldThrowSecurityExceptionIfNotAuthenticated() {

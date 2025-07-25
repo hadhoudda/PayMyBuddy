@@ -10,7 +10,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.*;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -20,16 +24,17 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
+@SpringBootTest
+@Transactional
 class TransactionServiceTest {
 
-    @Mock
+    @MockitoBean
     private TransactionRepository transactionRepository;
 
-    @Mock
+    @MockitoBean
     private UserRepository userRepository;
 
-    @InjectMocks
+    @Autowired
     private TransactionService transactionService;
 
     private User userSource;
