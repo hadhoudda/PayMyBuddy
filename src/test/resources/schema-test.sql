@@ -56,11 +56,3 @@ CREATE TABLE IF NOT EXISTS `transactions` (
     FOREIGN KEY (`user_id_receiver`) REFERENCES `users` (`id_user`)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
-
--- -----------------------------------------------------
--- Insert sample users
--- -----------------------------------------------------
---DELETE FROM users;
---INSERT INTO users (user_name, email, password, solde, date_create) VALUES
---('user1', 'user1@yahoo.fr', 'user_1', 0.00, CURRENT_TIMESTAMP),
---('user2', 'user2@yahoo.fr', 'user_2', 0.00, CURRENT_TIMESTAMP);
