@@ -14,6 +14,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 
+/**
+ * Contrôleur gérant les relations de contact entre utilisateurs :
+ * affichage du formulaire d'ajout de contact
+ * ajout d'un nouveau contact
+ * suppression d'un contact existant
+ */
 @Controller
 @RequestMapping("/paymybuddy")
 public class ContactController {
@@ -25,7 +31,12 @@ public class ContactController {
         this.contactService = contactService;
     }
 
-
+    /**
+     * Affiche le formulaire pour ajouter un nouveau contact.
+     *
+     * @param model modèle Spring contenant les attributs pour la vue
+     * @return la vue "relation"
+     */
     @GetMapping("/relation")
     public String relation(Model model) {
         if (!model.containsAttribute("contactDto")) {
@@ -34,6 +45,14 @@ public class ContactController {
         return "relation";
     }
 
+    /**
+     * Traite le formulaire d'ajout d'un contact.
+     *
+     * @param contactDto         DTO contenant l'email du contact à ajouter
+     * @param result             résultat de la validation du formulaire
+     * @param redirectAttributes attributs pour rediriger avec des messages flash
+     * @return redirection vers la page "/relation" avec message de succès ou d'erreur
+     */
     @PostMapping("/relation")
     public String addContact(
             @ModelAttribute("contactDto") @Valid ContactDto contactDto,
@@ -63,6 +82,13 @@ public class ContactController {
         return "redirect:/paymybuddy/relation";
     }
 
+    /**
+     * Supprime un contact à partir de son email.
+     *
+     * @param email              email du contact à supprimer
+     * @param redirectAttributes attributs pour afficher un message flash
+     * @return redirection vers la page de profil
+     */
     @PostMapping("/contact/delete")
     public String deleteContact(@RequestParam String email,
                                 RedirectAttributes redirectAttributes) {
@@ -75,4 +101,3 @@ public class ContactController {
         return "redirect:/paymybuddy/profil";
     }
 }
-

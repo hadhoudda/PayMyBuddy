@@ -1,7 +1,6 @@
 package com.paymybuddy.controller;
 
 import com.paymybuddy.config.CustomUserDetails;
-import org.springframework.ui.Model;
 import com.paymybuddy.dto.TransactionDto;
 import com.paymybuddy.model.Transaction;
 import com.paymybuddy.model.User;
@@ -16,15 +15,21 @@ import org.apache.logging.log4j.core.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
+/**
+ * Contrôleur gérant les transferts d'argent entre utilisateurs.
+ */
 @Controller
 @RequestMapping("/paymybuddy")
 public class TransactionController {
@@ -44,6 +49,13 @@ public class TransactionController {
         this.userService = userService;
     }
 
+    /**
+     * Affiche le formulaire de transfert et la liste des transactions de l'utilisateur connecté.
+     *
+     * @param model       modèle Spring pour passer les attributs à la vue
+     * @param userDetails détails de l'utilisateur connecté
+     * @return la vue "transfert"
+     */
     @GetMapping("/transfert")
     public String showTransfertForm(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
         User currentUser = userDetails.getUser();
@@ -57,6 +69,16 @@ public class TransactionController {
         return "transfert";
     }
 
+    /**
+     * Traite un transfert entre l'utilisateur connecté et un de ses contacts.
+     *
+     * @param transactionDto     données du formulaire
+     * @param result             résultat de la validation
+     * @param redirectAttributes permet d'ajouter des messages flash
+     * @param userDetails        utilisateur actuellement connecté
+     * @param model              modèle Spring
+     * @return la vue à afficher ou la redirection
+     */
     @PostMapping("/transfert")
     public String TransfertSolde(
             @ModelAttribute("transactionDto") @Valid TransactionDto transactionDto,
@@ -110,5 +132,4 @@ public class TransactionController {
             return "transfert";
         }
     }
-
 }

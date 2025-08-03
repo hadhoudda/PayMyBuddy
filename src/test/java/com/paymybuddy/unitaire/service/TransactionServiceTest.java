@@ -8,11 +8,12 @@ import com.paymybuddy.service.TransactionService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +43,7 @@ class TransactionServiceTest {
 
     @BeforeEach
     void setUp() {
+        // Arrange - création des utilisateurs source et cible avec soldes initialisés
         userSource = new User();
         userSource.setUserId(1L);
         userSource.setSolde(new BigDecimal("1000.00"));
@@ -85,7 +87,7 @@ class TransactionServiceTest {
         transactionService.transfertAmount(1L, 2L, "Paiement", 100.00);
 
         // Assert
-        assertEquals(new BigDecimal("899.50"), userSource.getSolde()); // 100 + 0.50 de frais
+        assertEquals(new BigDecimal("899.50"), userSource.getSolde()); // 100 + 0.50 de frais déduits
         assertEquals(new BigDecimal("600.00"), userTarget.getSolde());
     }
 
@@ -94,6 +96,7 @@ class TransactionServiceTest {
      */
     @Test
     void transfertAmount_shouldThrowExceptionWhenAmountIsZeroOrNegative() {
+        // Act & Assert
         assertThrows(IllegalArgumentException.class, () -> transactionService.transfertAmount(1L, 2L, "Test", 0));
         assertThrows(IllegalArgumentException.class, () -> transactionService.transfertAmount(1L, 2L, "Test", -50));
     }
@@ -103,8 +106,10 @@ class TransactionServiceTest {
      */
     @Test
     void transfertAmount_shouldThrowExceptionWhenSourceUserNotFound() {
+        // Arrange
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
+        // Act & Assert
         Exception exception = assertThrows(EntityNotFoundException.class,
                 () -> transactionService.transfertAmount(1L, 2L, "Test", 50));
         assertTrue(exception.getMessage().contains("Expéditeur non trouvé"));
@@ -115,9 +120,11 @@ class TransactionServiceTest {
      */
     @Test
     void transfertAmount_shouldThrowExceptionWhenTargetUserNotFound() {
+        // Arrange
         when(userRepository.findById(1L)).thenReturn(Optional.of(userSource));
         when(userRepository.findById(2L)).thenReturn(Optional.empty());
 
+        // Act & Assert
         Exception exception = assertThrows(EntityNotFoundException.class,
                 () -> transactionService.transfertAmount(1L, 2L, "Test", 50));
         assertTrue(exception.getMessage().contains("Destinataire non trouvé"));
@@ -128,11 +135,13 @@ class TransactionServiceTest {
      */
     @Test
     void transfertAmount_shouldThrowExceptionWhenSoldeIsInsufficient() {
-        userSource.setSolde(new BigDecimal("50.00")); // 100.00 + 0.50 = trop
+        // Arrange
+        userSource.setSolde(new BigDecimal("50.00")); // Solde insuffisant pour couvrir 100 + 0.50 frais
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(userSource));
         when(userRepository.findById(2L)).thenReturn(Optional.of(userTarget));
 
+        // Act & Assert
         Exception exception = assertThrows(IllegalArgumentException.class,
                 () -> transactionService.transfertAmount(1L, 2L, "Test", 100));
         assertTrue(exception.getMessage().contains("Solde insuffisant"));
@@ -143,11 +152,14 @@ class TransactionServiceTest {
      */
     @Test
     void getTransactionsForUser_shouldReturnTransactionList() {
+        // Arrange
         List<Transaction> mockList = Arrays.asList(new Transaction(), new Transaction());
         when(transactionRepository.findByUserSenderUserIdOrUserReceiverUserId(1L, 1L)).thenReturn(mockList);
 
+        // Act
         List<Transaction> result = transactionService.getTransactionsForUser(1L);
 
+        // Assert
         assertEquals(2, result.size());
         verify(transactionRepository).findByUserSenderUserIdOrUserReceiverUserId(1L, 1L);
     }

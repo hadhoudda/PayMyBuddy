@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class UserLoginDto {
+
     private String mail;
     private String password;
 

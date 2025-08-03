@@ -10,13 +10,13 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
-
 import java.time.LocalDateTime;
 
 @Component
 @Getter
 @Setter
 public class UserRegisterDto {
+
     @NotBlank(message = "Le nom d'utilisateur est obligatoire.")
     @Size(min = 4, max = 30, message = "Le nom d'utilisateur doit faire entre 4 et 30 caractères")
     private String userName;

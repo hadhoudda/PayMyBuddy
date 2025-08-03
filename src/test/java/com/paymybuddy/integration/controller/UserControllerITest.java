@@ -14,7 +14,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -35,7 +36,9 @@ class UserControllerITest {
     @Test
     @DisplayName("GET /login - Affiche le formulaire de connexion")
     void testShowLoginForm() throws Exception {
+        // Act
         mockMvc.perform(get("/paymybuddy/login"))
+                // Assert
                 .andExpect(status().isOk())
                 .andExpect(view().name("login"))
                 .andExpect(model().attributeExists("userLoginDto"));
@@ -44,7 +47,9 @@ class UserControllerITest {
     @Test
     @DisplayName("GET /register - Affiche le formulaire d'inscription")
     void testShowRegisterForm() throws Exception {
+        // Act
         mockMvc.perform(get("/paymybuddy/register"))
+                // Assert
                 .andExpect(status().isOk())
                 .andExpect(view().name("register"))
                 .andExpect(model().attributeExists("userRegisterDto"));
@@ -53,18 +58,21 @@ class UserControllerITest {
     @Test
     @DisplayName("POST /register - Inscription réussie")
     void testRegisterUserSuccess() throws Exception {
+        // Arrange
         UserRegisterDto dto = new UserRegisterDto();
         dto.setUserName("JohnDoe");
         dto.setEmail("john.doe@example.com");
         dto.setPassword("password123");
         dto.setConfirmPassword("password123");
 
+        // Act
         mockMvc.perform(post("/paymybuddy/register")
                         .flashAttr("userRegisterDto", dto))
+                // Assert
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/paymybuddy/register/confirmed"));
 
-        // Vérifie si l'utilisateur est bien enregistré
+        // Assert (BDD)
         User saved = userRepository.findByEmail("john.doe@example.com").orElse(null);
         assertThat(saved).isNotNull();
         assertThat(saved.getUserName()).isEqualTo("JohnDoe");
@@ -73,14 +81,17 @@ class UserControllerITest {
     @Test
     @DisplayName("POST /register - Mots de passe différents")
     void testRegisterUserPasswordMismatch() throws Exception {
+        // Arrange
         UserRegisterDto dto = new UserRegisterDto();
         dto.setUserName("Alice");
         dto.setEmail("alice@example.com");
         dto.setPassword("pass1");
         dto.setConfirmPassword("pass2");
 
+        // Act
         mockMvc.perform(post("/paymybuddy/register")
                         .flashAttr("userRegisterDto", dto))
+                // Assert
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/paymybuddy/register"))
                 .andExpect(flash().attributeExists("userRegisterDto"))
@@ -90,22 +101,23 @@ class UserControllerITest {
     @Test
     @DisplayName("POST /register - Email déjà utilisé")
     void testRegisterUserEmailAlreadyUsed() throws Exception {
-        // Ajoute un utilisateur existant dans la BDD
+        // Arrange
         User existingUser = new User();
         existingUser.setUserName("ExistingUser");
         existingUser.setEmail("used@example.com");
         existingUser.setPassword(passwordEncoder.encode("anypassword"));
         userRepository.save(existingUser);
 
-        // Prépare le DTO avec le même email
         UserRegisterDto dto = new UserRegisterDto();
         dto.setUserName("NewUser");
         dto.setEmail("used@example.com");
         dto.setPassword("password123");
         dto.setConfirmPassword("password123");
 
+        // Act
         mockMvc.perform(post("/paymybuddy/register")
                         .flashAttr("userRegisterDto", dto))
+                // Assert
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/paymybuddy/register"))
                 .andExpect(flash().attribute("emailError", "Un utilisateur avec cet email existe déjà"))

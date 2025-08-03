@@ -20,11 +20,12 @@ public class ContactDto {
     @Email(message = "Format de mail invalide.")
     private String email;
 
-    private String userName ;
+    private String userName;
 
     private LocalDateTime dateCreate;
 
-    public ContactDto() { }
+    public ContactDto() {
+    }
 
     public ContactDto(Contact contact) {
         this.contactId = contact.getContactId();
@@ -32,5 +33,4 @@ public class ContactDto {
         this.email = contact.getFriendIdUser().getEmail();
         this.userName = contact.getFriendIdUser().getUserName();
     }
-
 }

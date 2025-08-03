@@ -4,14 +4,13 @@ import com.paymybuddy.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 
@@ -28,13 +27,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                // Désactive
-                //.csrf(AbstractHttpConfigurer::disable)
                 .csrf(Customizer.withDefaults())
 
                 // Désactive le cache des pages protégées
                 .headers(headers -> headers
-                        .cacheControl(cache -> {}) // ajoute no-store, no-cache, must-revalidate
+                        .cacheControl(cache -> {
+                        })
                 )
 
                 // Configuration des accès
@@ -50,30 +48,28 @@ public class SecurityConfig {
                                 "/images/**"
                         ).permitAll()
                         // Toutes les autres requêtes nécessitent une authentification
-                        .anyRequest().authenticated()
+                        .anyRequest()
+                        .authenticated()
                 )
 
                 // Configuration du formulaire de login
                 .formLogin(form -> form
-                        .loginPage("/paymybuddy/login")            // Page personnalisée
-                        .loginProcessingUrl("/login")              // Action du formulaire
-                        //.usernameParameter("email")                // Champ du formulaire HTML
-                        //.passwordParameter("password")
-                        .defaultSuccessUrl("/paymybuddy/profil", true) // Redirection après succès
-                        .failureUrl("/paymybuddy/login?error=true")    // Redirection en cas d'erreur
+                        .loginPage("/paymybuddy/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/paymybuddy/profil", true)
+                        .failureUrl("/paymybuddy/login?error=true")
                         .permitAll()
                 )
 
                 // Configuration du logout la déconnexion
                 .logout(logout -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout")) // Point de sortie (URL de logout)
-                        .logoutSuccessUrl("/paymybuddy/login?logout=true")          // Redirection après déconnexion
-                        .invalidateHttpSession(true)                                // Détruit la session HTTP
-                        .deleteCookies("JSESSIONID")              // Supprime le cookie de session
-                        .permitAll()                                                // Accessible sans être connecté
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                        .logoutSuccessUrl("/paymybuddy/login?logout=true")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll()
                 )
-                .httpBasic(Customizer.withDefaults())//désactive en production
-
+                .httpBasic(Customizer.withDefaults())
                 .build();
     }
 

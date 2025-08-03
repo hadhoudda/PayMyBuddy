@@ -8,14 +8,15 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.http.MediaType;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(properties = "spring.profiles.active=test")
@@ -33,21 +34,24 @@ public class ContactControllerITest {
     @Test
     @WithMockUser(username = "testuser", roles = {"USER"})
     void shouldDisplayRelationPage() throws Exception {
+        // Act
         mockMvc.perform(get("/paymybuddy/relation"))
+                // Assert
                 .andExpect(status().isOk())
                 .andExpect(view().name("relation"))
                 .andExpect(model().attributeExists("contactDto"));
     }
 
-
     @Test
     @WithMockUser(username = "testuser", roles = {"USER"})
     void shouldRedirectBackOnValidationError() throws Exception {
+        // Arrange
         MockHttpServletRequestBuilder request = post("/paymybuddy/relation")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("email", "") // provoque une erreur de validation
                 .with(csrf());
 
+        // Act & Assert
         mockMvc.perform(request)
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/paymybuddy/relation"))
@@ -58,27 +62,27 @@ public class ContactControllerITest {
     @Test
     @WithMockUser(username = "testuser", roles = {"USER"})
     void shouldDeleteContact() throws Exception {
+        // Arrange
         MockHttpServletRequestBuilder request = post("/paymybuddy/contact/delete")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("email", "user2@yahoo.fr")
                 .with(csrf());
 
+        // Act & Assert
         mockMvc.perform(request)
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/paymybuddy/profil"));
     }
 
-
-
-
     @Test
     @WithMockUser(username = "testuser", roles = {"USER"})
     void shouldDisplayRelationPageWithContactDtoFromFlash() throws Exception {
+        // Arrange & Act
         mockMvc.perform(get("/paymybuddy/relation")
                         .flashAttr("contactDto", new ContactDto()))
+                // Assert
                 .andExpect(status().isOk())
                 .andExpect(view().name("relation"))
                 .andExpect(model().attributeExists("contactDto"));
     }
-
 }

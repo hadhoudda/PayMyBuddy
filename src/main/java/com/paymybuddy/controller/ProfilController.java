@@ -11,12 +11,22 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Contrôleur gérant les fonctionnalités liées au profil utilisateur :
+ * affichage du profil
+ * ajout de solde
+ * modification du nom d'utilisateur
+ * suppression du compte
+ */
 @Controller
 @RequestMapping("/paymybuddy")
 public class ProfilController {
@@ -30,6 +40,15 @@ public class ProfilController {
         this.contactService = contactService;
     }
 
+    /**
+     * Affiche la page de profil de l'utilisateur connecté.
+     * Empêche la mise en cache de la page pour des raisons de sécurité.
+     *
+     * @param response    objet HttpServletResponse pour ajouter des en-têtes
+     * @param model       modèle pour passer les attributs à la vue
+     * @param userDetails détails de l'utilisateur connecté
+     * @return la vue "profil" ou redirection si l'utilisateur est non authentifié
+     */
     @GetMapping("/profil")
     public String showProfil(
             HttpServletResponse response,
@@ -50,6 +69,7 @@ public class ProfilController {
         Optional<User> optionalUser = userService.findUserByEmail(email);
         logger.info("Profil demandé pour : {}", email);
 
+        // Si l'utilisateur n'est pas trouvé
         if (optionalUser.isEmpty()) {
             return "redirect:/paymybuddy";
         }
@@ -57,7 +77,7 @@ public class ProfilController {
         User user = optionalUser.get();
         model.addAttribute("user", user);
 
-        // Charger et injecter les contacts pour la modale
+        // Ajout des contacts pour affichage dans la modale
         List<Contact> contacts = contactService.getAllContacts(user.getUserId());
         model.addAttribute("contacts", contacts);
 
@@ -65,7 +85,13 @@ public class ProfilController {
         return "profil";
     }
 
-    // ajoute solde
+    /**
+     * Ajoute du solde au compte utilisateur.
+     *
+     * @param montant            montant à ajouter
+     * @param redirectAttributes permet d'afficher un message de confirmation ou d'erreur
+     * @return redirection vers la page de profil
+     */
     @PostMapping("/profil/solde")
     public String addSolde(@RequestParam("montant") double montant,
                            RedirectAttributes redirectAttributes) {
@@ -78,10 +104,16 @@ public class ProfilController {
         return "redirect:/paymybuddy/profil";
     }
 
-    // modifier username
+    /**
+     * Modifie le nom d'utilisateur de l'utilisateur connecté.
+     *
+     * @param userName           nouveau nom d'utilisateur
+     * @param redirectAttributes permet d'afficher un message de confirmation ou d'erreur
+     * @return redirection vers la page de profil
+     */
     @PostMapping("/profil/username")
     public String updateUserName(@RequestParam("username") String userName,
-                           RedirectAttributes redirectAttributes) {
+                                 RedirectAttributes redirectAttributes) {
         try {
             userService.updateUserName(userName);
             redirectAttributes.addFlashAttribute("success", "UserName modifié avec succès !");
@@ -91,7 +123,12 @@ public class ProfilController {
         return "redirect:/paymybuddy/profil";
     }
 
-    // supprime compte
+    /**
+     * Supprime le compte utilisateur connecté.
+     *
+     * @param redirectAttributes permet d'afficher un message de confirmation ou d'erreur
+     * @return redirection vers l'accueil
+     */
     @PostMapping("/profil/delete")
     public String deleteUser(RedirectAttributes redirectAttributes) {
         try {
@@ -103,5 +140,4 @@ public class ProfilController {
             return "redirect:/paymybuddy";
         }
     }
-
 }

@@ -2,15 +2,18 @@ package com.paymybuddy.model;
 
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "contacts", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id_owner", "user_id_friend"})
-})//evite les doublons du contact en base des donnees
+        @UniqueConstraint(columnNames = {"user_id_owner", "user_id_friend"})//évite les doublons du contact en base des donnees
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,7 +30,7 @@ public class Contact implements Serializable {
     @Column(name = "date_contact")
     private LocalDateTime dateContact;
 
-    //relation between table connection and user
+    // Users
     @ManyToOne
     @JoinColumn(name = "user_id_owner", nullable = false)
     private User ownerIdUser;

@@ -12,10 +12,13 @@ import java.util.Optional;
 @Repository
 public interface ContactRepository extends JpaRepository<Contact, Long> {
 
+    // Recherche un contact entre deux utilisateurs spécifiques : l'utilisateur propriétaire et son ami.
     Optional<Contact> findByOwnerIdUserAndFriendIdUser(User ownerUser, User friendUser);
-    // récupérer tous les contacts où l'utilisateur est le propriétaire
+
+    // Récupère tous les contacts où l'utilisateur donné est le propriétaire.
     List<Contact> findByOwnerIdUser(User ownerIdUser);
-    // trouver les contacts où l'utilisateur est l'ami (friend)
+
+    // Récupère tous les contacts où l'utilisateur donné est l'ami (friend).
     List<Contact> findByFriendIdUser(User friendIdUser);
 
 }

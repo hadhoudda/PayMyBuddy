@@ -13,7 +13,7 @@ import java.util.List;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    //pour affiche les transation que je le fait avec description
+    // Récupère la liste paginée des transactions envoyées par un utilisateur, triées par date de transaction décroissante.
     @Query("SELECT o FROM Transaction o WHERE o.userSender.userId = :userId ORDER BY o.transactionDate DESC")
     Page<Transaction> listTransactions(@Param("userId") Long userId, Pageable pageable);
 

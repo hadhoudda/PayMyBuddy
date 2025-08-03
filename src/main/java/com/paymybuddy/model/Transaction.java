@@ -32,7 +32,7 @@ public class Transaction implements Serializable {
     @Column(name = "date_transaction")
     private LocalDateTime transactionDate;
 
-    //relation between table transaction and user
+    // Users
     @ManyToOne
     @JoinColumn(name = "user_id_sender", nullable = false)
     private User userSender;
