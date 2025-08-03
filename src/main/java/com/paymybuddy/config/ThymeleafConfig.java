@@ -1,4 +1,3 @@
-
 package com.paymybuddy.config;
 
 import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect;

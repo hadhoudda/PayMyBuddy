@@ -72,7 +72,7 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")              // Supprime le cookie de session
                         .permitAll()                                                // Accessible sans être connecté
                 )
-                .httpBasic(Customizer.withDefaults())//desactive en production
+                .httpBasic(Customizer.withDefaults())//désactive en production
 
                 .build();
     }
